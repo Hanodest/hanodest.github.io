@@ -8,6 +8,7 @@ class Gui {
   #renderLoop;
 
   #controls;
+  #animationSpeed;
   #layersSettings;
   #canvas;
   #context;
@@ -17,6 +18,10 @@ class Gui {
 
     this.#controls = document.getElementById('global_controls');
     this.#layersSettings = document.getElementById('layers_settings');
+    this.#animationSpeed = document.getElementById('animation_speed');
+    this.#animationSpeed.addEventListener('dblclick', () => {
+      this.#animationSpeed.value = 60;
+    });
 
     this.#canvas = document.getElementById('image');
     this.#context = this.#canvas.getContext('2d', { willReadFrequently: true });
@@ -42,7 +47,7 @@ class Gui {
     let dayNight = parseInt(document.getElementById('day_night').value);
     this.#renderer.draw(this.#frame++, 255 - dayNight, this.#context);
 
-    let animationSpeed = parseInt(document.getElementById('animation_speed').value);
+    let animationSpeed = parseInt(this.#animationSpeed.value);
     this.#renderLoop = setTimeout(() => { this.drawSprite(); }, 1000 / animationSpeed);
   }
 
