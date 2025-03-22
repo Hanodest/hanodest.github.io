@@ -7,6 +7,7 @@ class Gui {
   #frame;
   #renderLoop;
 
+  #background;
   #controls;
   #animationSpeed;
   #layersSettings;
@@ -22,6 +23,7 @@ class Gui {
     this.#animationSpeed.addEventListener('dblclick', () => {
       this.#animationSpeed.value = 60;
     });
+    this.#background = document.getElementById('background');
 
     this.#canvas = document.getElementById('image');
     this.#context = this.#canvas.getContext('2d', { willReadFrequently: true });
@@ -34,18 +36,19 @@ class Gui {
     this.#controls.classList.add('hidden');
 
     this.#frame = 0;
+    this.#background.value = 'lab';
 
     if (typeof (this.#renderLoop) != 'undefined') {
       clearTimeout(this.#renderLoop);
       this.#renderLoop = undefined;
     }
 
-    this.#renderer.draw(/*frame=*/0, /*light=*/255, this.#context);
+    this.#renderer.draw(/*frame=*/0, /*light=*/255, this.#background.value, this.#context);
   }
 
   drawSprite() {
     let dayNight = parseInt(document.getElementById('day_night').value);
-    this.#renderer.draw(this.#frame++, 255 - dayNight, this.#context);
+    this.#renderer.draw(this.#frame++, 255 - dayNight, this.#background.value, this.#context);
 
     let animationSpeed = parseInt(this.#animationSpeed.value);
     this.#renderLoop = setTimeout(() => { this.drawSprite(); }, 1000 / animationSpeed);

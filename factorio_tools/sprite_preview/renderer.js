@@ -1,12 +1,20 @@
 import { lookupColor } from './lut.js';
 import { BoundingBox } from './bounding_box.js';
 import { Vector } from './vector.js';
+import { loadImage } from './image.js';
 
 class Renderer {
   #layers;
+  #backgrounds;
 
   constructor() {
     this.#layers = [];
+    this.#backgrounds = {};
+    ['nauvis', 'vulcanus', 'fulgora', 'gleba', 'aquilo'].forEach((background) => {
+      loadImage('./backgrounds/' + background + '.jpg').then((image) => {
+        this.#backgrounds[background] = image;
+      });
+    });
   }
 
   addLayer(layer) {
@@ -22,13 +30,15 @@ class Renderer {
     this.#layers.splice(to, 0, layerToMove);
   }
 
-  draw(frame, light, context) {
+  draw(frame, light, backgroundName, context) {
     let boundingBox = this.#layers.length == 0
-      ? new BoundingBox(new Vector(0, 0), new Vector(256, 256))
+      ? new BoundingBox(new Vector(-64, -64), new Vector(64, 64))
       : this.#layers.map((layer) => layer.boundingBox).reduce((b1, b2) => b1.union(b2));
+    let topLeft = boundingBox.topLeft.subtract(new Vector(64, 64));
+    let bottomRight = boundingBox.bottomRight.add(new Vector(64, 64));
 
-    let width = boundingBox.bottomRight.x - boundingBox.topLeft.x;
-    let height = boundingBox.bottomRight.y - boundingBox.topLeft.y;
+    let width = bottomRight.x - topLeft.x;
+    let height = bottomRight.y - topLeft.y;
     let canvas = context.canvas;
     canvas.width = width;
     canvas.height = height;
@@ -39,8 +49,8 @@ class Renderer {
     for (let x = 0; x < width; x++) {
       for (let y = 0; y < height; y++) {
         let tileColor = (
-          Math.floor((x + boundingBox.topLeft.x) / 64)
-          + Math.floor((y + boundingBox.topLeft.y) / 64)
+          Math.floor((x + topLeft.x) / 64)
+          + Math.floor((y + topLeft.y) / 64)
         ) % 2 == 0 ? 48 : 27;
         let pos = (width * y + x) * 4;
         for (let channel = 0; channel < 3; channel++) {
@@ -52,8 +62,16 @@ class Renderer {
       }
     }
 
+    let background = this.#backgrounds[backgroundName];
+    if (this.#layers.length != 0 && typeof(background) != 'undefined') {
+      context.drawImage(background,
+        (background.width - width) >> 1, (background.height - height) >> 1,
+        width, height, 0, 0, width, height);
+      image = context.getImageData(0, 0, width, height);
+    }
+
     this.#layers.forEach((layer) => {
-      layer.draw(frame, boundingBox, image, lightmap);
+      layer.draw(frame, new BoundingBox(topLeft, bottomRight), image, lightmap);
     });
 
     let data = new ImageData(width, height);
