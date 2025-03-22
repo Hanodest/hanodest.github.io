@@ -9,9 +9,10 @@ async function loadImage(imageUrl) {
 }
 
 function detectSpriteSize(data) {
-  let numColumns = 16;
-  for (numColumns = 16; numColumns > 1; numColumns--) {
-    if (image.width % numColumns != 0) {
+  let bestColumns = 1;
+  let bestResult = 16;
+  for (let numColumns = 2; numColumns <= 16; numColumns++) {
+    if (data.width % numColumns != 0) {
       continue;
     }
     let width = data.width / numColumns;
@@ -19,18 +20,22 @@ function detectSpriteSize(data) {
     let diff = 0;
     for (let x = 0; x < data.width - width; x += 4) {
       for (let y = 0; y < data.height; y += 4) {
-        total++;
-        diff += Math.abs(
-          data.data[(data.width * y + x) * 4 + 3] -
-          data.data[(data.width * y + x + width) * 4 + 3]);
+        for (let channel = 0; channel < 4; channel++) {
+          total++;
+          diff += Math.abs(
+            data.data[(data.width * y + x) * 4 + channel] -
+            data.data[(data.width * y + x + width) * 4 + channel]);
+        }
       }
     }
-    if (diff / total < 32) {
-      break;
+    if (diff/total < bestResult + 1) {
+      bestResult = diff/total;
+      bestColumns = numColumns;
     }
   }
-  let numRows = 16;
-  for (numRows = 16; numRows > 1; numRows--) {
+  let bestRows = 1;
+  bestResult = 16;
+  for (let numRows = 2; numRows <= 16; numRows++) {
     if (data.height % numRows != 0) {
       continue;
     }
@@ -39,18 +44,21 @@ function detectSpriteSize(data) {
     let diff = 0;
     for (let x = 0; x < data.width; x += 4) {
       for (let y = 0; y < data.height - height; y += 4) {
-        total++;
-        diff += Math.abs(
-          data.data[(data.width * y + x) * 4 + 3] -
-          data.data[(data.width * (y + height) + x) * 4 + 3]);
+        for (let channel = 0; channel < 4; channel++) {
+          total++;
+          diff += Math.abs(
+            data.data[(data.width * y + x) * 4 + channel] -
+            data.data[(data.width * (y + height) + x) * 4 + channel]);
+        }
       }
     }
-    if (diff / total < 32) {
-      break;
+    if (diff/total < bestResult + 1) {
+      bestResult = diff/total;
+      bestRows = numRows;
     }
   }
 
-  return [numRows, numColumns];
+  return [bestRows, bestColumns];
 }
 
 export { loadImage, detectSpriteSize };
