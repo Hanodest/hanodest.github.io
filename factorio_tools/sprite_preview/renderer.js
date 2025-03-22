@@ -39,8 +39,8 @@ class Renderer {
     for (let x = 0; x < width; x++) {
       for (let y = 0; y < height; y++) {
         let tileColor = (
-          Math.floor((x - boundingBox.topLeft.x) / 64)
-          + Math.floor((y - boundingBox.topLeft.y) / 64)
+          Math.floor((x + boundingBox.topLeft.x) / 64)
+          + Math.floor((y + boundingBox.topLeft.y) / 64)
         ) % 2 == 0 ? 48 : 27;
         let pos = (width * y + x) * 4;
         for (let channel = 0; channel < 3; channel++) {
