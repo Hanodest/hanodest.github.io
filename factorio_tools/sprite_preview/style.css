@@ -58,6 +58,10 @@ select, .box-light {
   margin: 2px;
 }
 
+.text-button {
+  user-select: none;
+}
+
 .box-dark {
   border-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABEAAAARCAMAAAAMs7fIAAAATlBMVEU/PT4+OjoYGBgvJyQ8ODcjIB84MjE1LSoyKylqZ2Y1MS9kYWBYVVRHRENjX15eWVdWUlFRSkdGQkFFPjw7NTRTTEpEOzczLy4qIyEfHBrv6MtSAAAAcElEQVQY033OSw7DMAhF0dfgBmq3/ua7/40Wi0FVR8qZIF0JAUoKr5+QCrY1xRhDpzOtG7iVnN8m59IYxK7Vj6nNMYHEL+5h3OKll1kDOk1zL6wFRgvfljqUerd1vXX95yCR3ZtdhA48Rzinfyem0RcaxQcJZ0X0BAAAAABJRU5ErkJggg==") 8/4px repeat;
   background-color: #404040;
