@@ -112,6 +112,10 @@ input[type="number"] {
     -moz-appearance: textfield;
 }
 
+.collapsed .layer-settings {
+  display: none;
+}
+
 .dimensions-container {
   display: flex;
   flex-direction: row-reverse;
@@ -125,6 +129,17 @@ input[type="number"] {
 .dimensions-column {
   display: table-cell;
   text-align: end;
+}
+
+.collapse-icon {
+  margin: 4px;
+  width: 16px;
+  height: 16px;
+  background-size: 100%;
+  background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IB2cksfwAAAARnQU1BAACxjwv8YQUAAAAgY0hSTQAAeiYAAICEAAD6AAAAgOgAAHUwAADqYAAAOpgAABdwnLpRPAAAAAlwSFlzAAAuIwAALiMBeKU/dgAAAAd0SU1FB+kDFhUYJ/Kx3tAAAAAGYktHRAD/AP8A/6C9p5MAAACiSURBVHjaYzA0MJChBAMNMJShAA9rAxITEv8dPXr0//Hjx/8nJSX9NzI0UiTagNiY2NeXLl36//Dhw/+PHj36D2LHxcV9ARlC0IDwsPDz586dg2mG4wsXLvyPjIi8ATIEpwGBAYGbT58+DdOMgc+ePfs/OCh4D04DDhw4ANOMEx86dOi/sZGxGlYD1q5Z+//q1asg52LDYLn169ejGkA5GAUAw0LyuIaZP2wAAAAASUVORK5CYII=");
+}
+.collapsed .collapse-icon {
+  transform: scaleY(-1);
 }
 
 .range-line {

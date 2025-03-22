@@ -125,6 +125,14 @@ class Layer extends EventTarget {
       event.preventDefault();
     });
 
+    this.#container.classList.add('collapsed');
+
+    let collapseButton = document.createElement('div');
+    collapseButton.classList.add('collapse-icon');
+    collapseButton.addEventListener('click', () => {
+      this.#container.classList.toggle('collapsed');
+    });
+
     let label = document.createElement('div');
     label.innerText = imageName;
     label.classList.add('label-text');
@@ -165,7 +173,7 @@ class Layer extends EventTarget {
 
     let labelRow = document.createElement('div');
     labelRow.classList.add('box-dark', 'right-aligned');
-    labelRow.replaceChildren(closeButton, dragBlock, label);
+    labelRow.replaceChildren(closeButton, dragBlock, label, collapseButton);
     labelRow.draggable = true;
 
     this.#blendMode = createBlendSelect();
@@ -174,11 +182,15 @@ class Layer extends EventTarget {
     this.#tintColor.type = 'color';
     this.#tintColor.value = '#ffffff';
 
-    let layerControls = document.createElement('div');
-    layerControls.classList.add('right-aligned');
-    layerControls.replaceChildren(this.#tintColor, this.#drawMode, this.#blendMode);
+    let colorControls = document.createElement('div');
+    colorControls.classList.add('right-aligned');
+    colorControls.replaceChildren(this.#tintColor, this.#drawMode, this.#blendMode);
 
-    this.#container.replaceChildren(labelRow, dimensionsContainer, layerControls);
+    let layerSettings = document.createElement('div');
+    layerSettings.classList.add('layer-settings');
+    layerSettings.replaceChildren(dimensionsContainer, colorControls);
+
+    this.#container.replaceChildren(labelRow, layerSettings);
   }
 
   draw(frame, boundingBox, image, lightmap) {
