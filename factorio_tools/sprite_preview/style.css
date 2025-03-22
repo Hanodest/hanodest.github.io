@@ -49,22 +49,6 @@ body {
   flex: auto;
 }
 
-.error-icon {
-  background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAAAbFBMVEUAAAD/xQD/xQD/xAD/xAD/xQD/xAD/xQD/wwD/xQD/xQD/xAD/xAD/wwD/xgD/wgD/vwD/zAD/xQD/xAD/xQAdHR1nVBPDmAf2vgFSRRW0jQnWpgXmsgPjrwPxuwFANxg+NhhiUBSzjQnstwI3qGwRAAAAFHRSTlMAf/Po3M27qGtYU05FMyQVDAWSkr/S0qIAAACASURBVBjTVc1HEsJADERReQDnCF/ONun+d2RUJPst1NW9kXxkmeyUuHI3RBBte4FXbIZwud6W8N9zRtUH+W840al2nL49gUl1guTdmyPMqjMcGzEx0Kv2PmLr9QGvbe0eaj8EbAQilcPr2/tq6Sq5WNrbEXMWh1mH4YlxkgY76Qt74Qra76SCEAAAAABJRU5ErkJggg==");
-  background-size: 100%;
-  width: 16px;
-  height: 16px;
-}
-.error-text {
-  text-align: right;
-  background-color: #404040;
-  margin-left: 4px;
-}
-.size-error:not(.hidden) {
-  display: flex;
-  flex-direction: row-reverse;
-}
-
 select, .box-light {
   border-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABEAAAARCAMAAAAMs7fIAAAAY1BMVEURERGLi4uNjY13d3dfX1+GhoZqamqIiIg1NTXIyMiDg4Nra2u9vb2srKyQkJCAgICUlJS6urqmpqaCgoI9PT3CwsKzs7Opqamfn598fHxnZ2dmZmZaWlpUVFQtLS0dHR0YGBhqgy5gAAAAgElEQVQY043OyxKDIAyF4QQIabGNBfF+ff+n7Cjj1A4bv+W/SA4EXz9/ah9AQuNfJ98EgV669n1qO+nBahL5JCKkLRirS0fEzESu1NYchRh3TKkUuiJEpRQiVbo4imNUO2R3t+R38l/5nnky42CTYTTTDDE+rmKEZYWrdYEN/m1fTjwJeaI3KW0AAAAASUVORK5CYII=") 8/4px repeat;
   background-color: #8e8e8e;
@@ -94,10 +78,6 @@ canvas {
   margin: -4px -4px -8px;
 }
 
-.layer-controls {
-  display: flex;
-  flex-direction: row-reverse;
-}
 select {
   padding: 4px;
 }
@@ -113,6 +93,16 @@ input[type='color'] {
   top: 7px;
 }
 
+input[type="number"] {
+  margin: 4px 4px;
+  background-color: #8e8e8e;
+  width: 30px;
+  text-align: center;
+  outline: none;
+}
+input[type="number"]:focus {
+  background-color: #f1be64;
+}
 input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {
     -webkit-appearance: none;
@@ -121,18 +111,20 @@ input[type="number"]::-webkit-inner-spin-button {
 input[type="number"] {
     -moz-appearance: textfield;
 }
-.dimensions {
+
+.dimensions-container {
   display: flex;
+  flex-direction: row-reverse;
 }
-.dimensions input {
-  margin: 0 4px;
-  background-color: #8e8e8e;
-  width: 50px;
-  text-align: center;
-  outline: none;
+.dimensions-table {
+  display: table;
 }
-.dimensions input:focus {
-  background-color: #f1be64;
+.dimensions-row {
+  display: table-row;
+}
+.dimensions-column {
+  display: table-cell;
+  text-align: end;
 }
 
 .range-line {
@@ -142,6 +134,11 @@ input[type="number"] {
 .range-container {
   flex: 1;
   margin: 0 8px;
+}
+
+.right-aligned {
+  display: flex;
+  flex-direction: row-reverse;
 }
 
 input[type='range'] {

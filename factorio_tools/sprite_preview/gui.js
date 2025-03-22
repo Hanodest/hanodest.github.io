@@ -1,6 +1,6 @@
 import { Layer } from './layer.js';
 import { Renderer } from './renderer.js';
-import { detectSpriteSize, loadImage } from './image.js';
+import { loadImage } from './image.js';
 
 class Gui {
   #renderer;
@@ -8,18 +8,15 @@ class Gui {
   #renderLoop;
 
   #controls;
-  #sizeError;
+  #layersSettings;
   #canvas;
   #context;
-
-  #imageDimensions;
-  #sheetDimensions;
 
   constructor() {
     this.#renderer = new Renderer();
 
     this.#controls = document.getElementById('global_controls');
-    this.#sizeError = document.getElementById('size_error');
+    this.#layersSettings = document.getElementById('layers_settings');
 
     this.#canvas = document.getElementById('image');
     this.#context = this.#canvas.getContext('2d', { willReadFrequently: true });
@@ -32,31 +29,18 @@ class Gui {
     this.#controls.classList.add('hidden');
 
     this.#frame = 0;
-    this.#imageDimensions = undefined;
-    this.#sheetDimensions = undefined;
 
     if (typeof (this.#renderLoop) != 'undefined') {
       clearTimeout(this.#renderLoop);
       this.#renderLoop = undefined;
     }
 
-    this.#canvas.width = 256;
-    this.#canvas.height = 256;
-    this.#renderer.draw(this.#context, 0, 0, 255);
+    this.#renderer.draw(/*frame=*/0, /*light=*/255, this.#context);
   }
 
   drawSprite() {
-    let numRows = this.#sheetDimensions.numRows;
-    let numColumns = this.#sheetDimensions.numColumns;
-    let frame = (this.#frame++) % (numRows * numColumns);
-
-    this.#canvas.width = Math.floor(this.#imageDimensions.width / this.#sheetDimensions.numColumns);
-    this.#canvas.height = Math.floor(this.#imageDimensions.height / this.#sheetDimensions.numRows);
-
-    let dx = this.#canvas.width * Math.floor(frame % numColumns);
-    let dy = this.#canvas.height * Math.floor(frame / numColumns);
     let dayNight = parseInt(document.getElementById('day_night').value);
-    this.#renderer.draw(this.#context, dx, dy, 255 - dayNight);
+    this.#renderer.draw(this.#frame++, 255 - dayNight, this.#context);
 
     let animationSpeed = parseInt(document.getElementById('animation_speed').value);
     this.#renderLoop = setTimeout(() => { this.drawSprite(); }, 1000 / animationSpeed);
@@ -64,24 +48,23 @@ class Gui {
 
   addLayer(imageName, image) {
     let layer = new Layer(imageName, image);
-    let layersSettings = document.getElementById('layers_settings');
-    layersSettings.appendChild(layer.container);
+    this.#layersSettings.appendChild(layer.container);
     layer.addEventListener('delete', () => {
-      layersSettings.removeChild(layer.container);
+      this.#layersSettings.removeChild(layer.container);
       this.#renderer.removeLayer(layer);
-      if (layersSettings.childElementCount == 0) {
+      if (this.#layersSettings.childElementCount == 0) {
         this.reset();
       }
     });
     layer.addEventListener('moveLayer', (event) => {
       let dragStart = event.detail.dragStart;
       let dragEnd = event.detail.dragEnd;
-      let moveFrom = layersSettings.children[dragStart];
-      let moveTo = layersSettings.children[dragEnd + (dragStart < dragEnd ? 1 : 0)];
+      let moveFrom = this.#layersSettings.children[dragStart];
+      let moveTo = this.#layersSettings.children[dragEnd + (dragStart < dragEnd ? 1 : 0)];
       if (typeof (moveTo) == 'undefined') {
-        layersSettings.appendChild(moveFrom);
+        this.#layersSettings.appendChild(moveFrom);
       } else {
-        layersSettings.insertBefore(moveFrom, moveTo);
+        this.#layersSettings.insertBefore(moveFrom, moveTo);
       }
       this.#renderer.moveLayer(dragStart, dragEnd);
     });
@@ -90,25 +73,10 @@ class Gui {
 
   async loadImage(imageName, imageUrl) {
     let image = await loadImage(imageUrl);
-
-    if (typeof (this.#imageDimensions) == 'undefined') {
-      this.#imageDimensions = {
-        width: image.width,
-        height: image.height
-      };
-      this.#sheetDimensions = detectSpriteSize(image);
-      document.getElementById('num_rows').value = this.#sheetDimensions.numRows;
-      document.getElementById('num_columns').value = this.#sheetDimensions.numColumns;
+    if (this.#layersSettings.childElementCount == 0) {
       this.#controls.classList.remove('hidden');
       setTimeout(() => { this.drawSprite(); }, 0);
-    } else if (image.width != this.#imageDimensions.width ||
-      image.height != this.#imageDimensions.height) {
-      this.#sizeError.classList.remove('hidden');
-      setTimeout(() => { this.#sizeError.classList.add('hidden'); }, 5000);
-      return;
     }
-
-    this.#sizeError.classList.add('hidden');
     this.addLayer(imageName, image);
   }
 
@@ -131,18 +99,6 @@ class Gui {
     });
     document.getElementById('add_layer').addEventListener('click', () => {
       file.click();
-    });
-    document.getElementById('num_rows').addEventListener('change', (event) => {
-      let value = event.target.value;
-      if (value != '') {
-        this.#sheetDimensions.numRows = Math.max(1, Math.min(100, parseInt(value)));
-      }
-    });
-    document.getElementById('num_columns').addEventListener('change', (event) => {
-      let value = event.target.value;
-      if (value != '') {
-        this.#sheetDimensions.numColumns = Math.max(1, Math.min(100, parseInt(value)));
-      }
     });
   }
 

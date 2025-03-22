@@ -1,4 +1,6 @@
-import { lookupColor } from './lut.js'
+import { lookupColor } from './lut.js';
+import { BoundingBox } from './bounding_box.js';
+import { Vector } from './vector.js';
 
 class Renderer {
   #layers;
@@ -20,44 +22,51 @@ class Renderer {
     this.#layers.splice(to, 0, layerToMove);
   }
 
-  draw(context, dx, dy, light) {
+  draw(frame, light, context) {
+    let boundingBox = this.#layers.length == 0
+      ? new BoundingBox(new Vector(0, 0), new Vector(256, 256))
+      : this.#layers.map((layer) => layer.boundingBox).reduce((b1, b2) => b1.union(b2));
+
+    let width = boundingBox.bottomRight.x - boundingBox.topLeft.x;
+    let height = boundingBox.bottomRight.y - boundingBox.topLeft.y;
     let canvas = context.canvas;
-    let width = canvas.width;
-    let height = canvas.height;
-    let image = new Uint8Array(width * height * 4);
-    let lightmap = new Uint8Array(width * height * 4);
+    canvas.width = width;
+    canvas.height = height;
+
+    let image = new ImageData(width, height);
+    let lightmap = new ImageData(width, height);
 
     for (let x = 0; x < width; x++) {
       for (let y = 0; y < height; y++) {
         let tileColor = (
-          Math.floor((x - (width >> 1)) / 64) +
-          Math.floor((y - (height >> 1)) / 64))
-          % 2 == 0 ? 48 : 27;
+          Math.floor((x - boundingBox.topLeft.x) / 64)
+          + Math.floor((y - boundingBox.topLeft.y) / 64)
+        ) % 2 == 0 ? 48 : 27;
         let pos = (width * y + x) * 4;
         for (let channel = 0; channel < 3; channel++) {
-          image[pos + channel] = tileColor;
-          lightmap[pos + channel] = light;
+          image.data[pos + channel] = tileColor;
+          lightmap.data[pos + channel] = light;
         }
-        image[pos + 3] = 255;
-        lightmap[pos + 3] = 255;
+        image.data[pos + 3] = 255;
+        lightmap.data[pos + 3] = 255;
       }
     }
 
     this.#layers.forEach((layer) => {
-      layer.draw(image, lightmap, dx, dy, width, height);
+      layer.draw(frame, boundingBox, image, lightmap);
     });
 
-    let data = context.getImageData(0, 0, width, height);
+    let data = new ImageData(width, height);
     for (let x = 0; x < width; x++) {
       for (let y = 0; y < height; y++) {
         let pos = (width * y + x) * 4;
-        let lightColor = image.slice(pos, pos + 4);
+        let lightColor = image.data.slice(pos, pos + 4);
         let darkColor = lookupColor(lightColor);
         for (let channel = 0; channel < 4; channel++) {
           data.data[pos + channel] =
             Math.floor(
-              (lightColor[channel] * lightmap[pos + channel] +
-                darkColor[channel] * (255 - lightmap[pos + channel]))
+              (lightColor[channel] * lightmap.data[pos + channel] +
+                darkColor[channel] * (255 - lightmap.data[pos + channel]))
               / 255);
         }
       }
