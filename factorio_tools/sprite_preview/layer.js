@@ -1,6 +1,5 @@
 import { Vector } from './vector.js';
 import { BoundingBox } from './bounding_box.js';
-import { detectSpriteSize } from './image.js';
 
 function toUint8(x) {
   return Math.max(0, Math.min(255, Math.round(x)));
@@ -70,7 +69,6 @@ function createDimensionsRow(elements) {
 }
 
 class Layer extends EventTarget {
-  #canvas;
   #context;
 
   #container;
@@ -78,25 +76,18 @@ class Layer extends EventTarget {
   #drawMode;
   #tintColor;
 
-  #fileName;
   #size;
   #shift;
   #lineLength;
   #frameCount;
 
-  constructor(imageName, image) {
+  constructor(settings) {
     super();
-    this.#canvas = new OffscreenCanvas(image.width, image.height);
-    this.#context = this.#canvas.getContext('2d', { 'willReadFrequently': true });
-    this.#context.drawImage(image, 0, 0);
 
-    this.#fileName = imageName;
-    let [numRows, numColumns] = detectSpriteSize(
-      this.#context.getImageData(0, 0, image.width, image.height));
-    this.#lineLength = numColumns;
-    this.#frameCount = numRows * numColumns;
-    this.#size = new Vector(image.width / numColumns, image.height / numRows);
-    this.#shift = new Vector(0, 0);
+    this.#lineLength = settings.lineLength;
+    this.#frameCount = settings.frameCount;
+    this.#size = settings.size;
+    this.#shift = settings.shift;
 
     this.#container = document.createElement('div');
     this.#container.classList.add('layer');
@@ -135,7 +126,7 @@ class Layer extends EventTarget {
     });
 
     let label = document.createElement('div');
-    label.innerText = imageName;
+    label.innerText = settings.title;
     label.classList.add('label-text');
 
     let dragBlock = document.createElement('div');
@@ -178,10 +169,12 @@ class Layer extends EventTarget {
     labelRow.draggable = true;
 
     this.#blendMode = createBlendSelect();
+    this.#blendMode.value = settings.blendMode;
     this.#drawMode = createDrawSelect();
+    this.#drawMode.value = settings.drawMode;
     this.#tintColor = document.createElement('input');
     this.#tintColor.type = 'color';
-    this.#tintColor.value = '#ffffff';
+    this.#tintColor.value = settings.tint;
 
     let colorControls = document.createElement('div');
     colorControls.classList.add('right-aligned');
@@ -192,6 +185,10 @@ class Layer extends EventTarget {
     layerSettings.replaceChildren(dimensionsContainer, colorControls);
 
     this.#container.replaceChildren(labelRow, layerSettings);
+  }
+
+  addImage(imageName, context) {
+    this.#context = context;
   }
 
   draw(frame, boundingBox, image, lightmap) {

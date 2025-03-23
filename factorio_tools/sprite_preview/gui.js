@@ -1,6 +1,24 @@
 import { Layer } from './layer.js';
 import { Renderer } from './renderer.js';
-import { loadImage } from './image.js';
+import { Vector } from './vector.js';
+import { detectSpriteSize, loadImage } from './image.js';
+
+function createLayerSettings(imageName, context) {
+  let canvas = context.canvas;
+  let [numRows, numColumns] = detectSpriteSize(
+    context.getImageData(0, 0, canvas.width, canvas.height));
+
+  return {
+    title: imageName,
+    size: new Vector(canvas.width / numColumns, canvas.height / numRows),
+    shift: new Vector(0, 0),
+    frameCount: numRows * numColumns,
+    lineLength: numColumns,
+    blendMode: 'normal',
+    drawMode: 'sprite',
+    tint: '#ffffff',
+  };
+}
 
 class Gui {
   #renderer;
@@ -54,8 +72,8 @@ class Gui {
     this.#renderLoop = setTimeout(() => { this.drawSprite(); }, 1000 / animationSpeed);
   }
 
-  addLayer(imageName, image) {
-    let layer = new Layer(imageName, image);
+  addLayer(layerSettings) {
+    let layer = new Layer(layerSettings);
     this.#layersSettings.appendChild(layer.container);
     layer.addEventListener('delete', () => {
       this.#layersSettings.removeChild(layer.container);
@@ -77,6 +95,7 @@ class Gui {
       this.#renderer.moveLayer(dragStart, dragEnd);
     });
     this.#renderer.addLayer(layer);
+    return layer;
   }
 
   async loadImage(imageName, imageUrl) {
@@ -85,7 +104,14 @@ class Gui {
       this.#controls.classList.remove('hidden');
       setTimeout(() => { this.drawSprite(); }, 0);
     }
-    this.addLayer(imageName, image);
+
+    let canvas = new OffscreenCanvas(image.width, image.height);
+    let context = canvas.getContext('2d', { willReadFrequently: true });
+    context.drawImage(image, 0, 0);
+
+    let layerSettings = createLayerSettings(imageName, context);
+    let layer = this.addLayer(layerSettings);
+    layer.addImage(imageName, context);
   }
 
   loadFromFile(file) {
