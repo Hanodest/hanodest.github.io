@@ -159,6 +159,7 @@ class Layer extends EventTarget {
     let addSpritesheetsInput = document.createElement('input');
     addSpritesheetsInput.type = 'file';
     addSpritesheetsInput.accept = 'image/*';
+    addSpritesheetsInput.multiple = true;
     addSpritesheetsInput.addEventListener('change', () => {
       for (let file of addSpritesheetsInput.files) {
         this.addImage(ImageFile.fromFile(file));
@@ -170,7 +171,18 @@ class Layer extends EventTarget {
     addSpritesheetsButton.addEventListener('click', () => {
       addSpritesheetsInput.click();
     });
-    fileListBar.replaceChildren(addSpritesheetsButton, this.#fileListTitle, fileCollapseButton);
+    let deleteAllSpritesheets = document.createElement('div');
+    deleteAllSpritesheets.classList.add('delete-icon');
+    deleteAllSpritesheets.addEventListener('click', () => {
+      this.#imageFiles = [];
+      this.#fileList.replaceChildren();
+      this.#fileListTitle.innerText = 'Spritesheets: 0';
+      this.#frameCount = 0;
+      this.#frameCountInput.value = this.#frameCount;
+    });
+
+    fileListBar.replaceChildren(
+      deleteAllSpritesheets, addSpritesheetsButton, this.#fileListTitle, fileCollapseButton);
 
     this.#fileList = document.createElement('div');
     this.#fileList.classList.add('inner-collapsible');
