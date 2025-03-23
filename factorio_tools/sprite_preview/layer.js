@@ -33,7 +33,8 @@ function createDrawSelect() {
     ['Sprite', 'sprite'],
     ['Light', 'light'],
     ['Glow', 'glow'],
-    ['Shadow', 'shadow']
+    ['Shadow', 'shadow'],
+    ['Hidden', 'hidden'],
   ]);
 }
 
