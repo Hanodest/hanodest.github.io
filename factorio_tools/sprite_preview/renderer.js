@@ -45,6 +45,7 @@ class Renderer {
 
     let image = new ImageData(width, height);
     let lightmap = new ImageData(width, height);
+    let shadowmap = new ImageData(width, height);
 
     for (let x = 0; x < width; x++) {
       for (let y = 0; y < height; y++) {
@@ -63,11 +64,22 @@ class Renderer {
     }
 
     let background = this.#backgrounds[backgroundName];
-    if (this.#layers.length != 0 && typeof(background) != 'undefined') {
+    if (this.#layers.length != 0 && typeof (background) != 'undefined') {
       context.drawImage(background,
         (background.width - width) >> 1, (background.height - height) >> 1,
         width, height, 0, 0, width, height);
       image = context.getImageData(0, 0, width, height);
+    }
+
+    this.#layers.forEach((layer) => {
+      layer.drawShadow(frame, new BoundingBox(topLeft, bottomRight), shadowmap);
+    });
+    for (let pos = 0; pos < width * height; pos++) {
+      if (shadowmap.data[pos * 4 + 3] > 0) {
+        for (let channel = 0; channel < 3; channel++) {
+          image.data[pos * 4 + channel] >>= 1;
+        }
+      }
     }
 
     this.#layers.forEach((layer) => {

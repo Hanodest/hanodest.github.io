@@ -32,7 +32,8 @@ function createDrawSelect() {
   return createSelect([
     ['Sprite', 'sprite'],
     ['Light', 'light'],
-    ['Glow', 'glow']
+    ['Glow', 'glow'],
+    ['Shadow', 'shadow']
   ]);
 }
 
@@ -260,6 +261,28 @@ class Layer extends EventTarget {
         for (let channel = 0; channel < 3; channel++) {
           let src = Math.floor(data.data[pos + channel] * tint[channel] * srcAlpha / 255);
           lightmap.data[dstPos + channel] = Math.min(lightmap.data[dstPos + channel] + src, 255);
+        }
+      }
+    }
+  }
+
+  drawShadow(frame, boundingBox, shadowmap) {
+    if (this.drawMode != 'shadow') {
+      return;
+    }
+    frame = frame % this.#frameCount;
+    let column = frame % this.#lineLength;
+    let row = Math.floor(frame / this.#lineLength);
+    let width = this.#size.x;
+    let height = this.#size.y;
+    let data = this.#context.getImageData(width * column, height * row, width, height);
+    let shift = this.boundingBox.topLeft.subtract(boundingBox.topLeft);
+    for (let x = 0; x < width; x++) {
+      for (let y = 0; y < height; y++) {
+        let pos = (width * y + x) * 4;
+        let dstPos = (shadowmap.width * (y + shift.y) + (x + shift.x)) * 4;
+        if (data.data[pos + 3] > 127) {
+          shadowmap.data[dstPos + 3] = 1;
         }
       }
     }
