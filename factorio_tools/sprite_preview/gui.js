@@ -1,7 +1,8 @@
+import { detectSpriteSize, loadImage } from './image.js';
+import { ImageFile } from './imageFile.js';
 import { Layer } from './layer.js';
 import { Renderer } from './renderer.js';
 import { Vector } from './vector.js';
-import { detectSpriteSize, loadImage } from './image.js';
 
 function createLayerSettings(imageName, context) {
   let canvas = context.canvas;
@@ -12,7 +13,7 @@ function createLayerSettings(imageName, context) {
     title: imageName,
     size: new Vector(canvas.width / numColumns, canvas.height / numRows),
     shift: new Vector(0, 0),
-    frameCount: numRows * numColumns,
+    frameCount: 0,
     lineLength: numColumns,
     blendMode: 'normal',
     drawMode: 'sprite',
@@ -111,7 +112,7 @@ class Gui {
 
     let layerSettings = createLayerSettings(imageName, context);
     let layer = this.addLayer(layerSettings);
-    layer.addImage(imageName, context);
+    layer.addImage(ImageFile.fromResolvedContext(imageName, context));
   }
 
   loadFromFile(file) {
@@ -126,13 +127,15 @@ class Gui {
   }
 
   setupHandlers() {
-    let file = document.getElementById('file');
-    file.addEventListener('change', () => {
-      this.loadFromFile(file.files[0]);
-      file.value = '';
+    let fileInput = document.getElementById('file');
+    fileInput.addEventListener('change', () => {
+      for (let file of fileInput.files) {
+        this.loadFromFile(file);
+      }
+      fileInput.value = '';
     });
     document.getElementById('add_layer').addEventListener('click', () => {
-      file.click();
+      fileInput.click();
     });
   }
 

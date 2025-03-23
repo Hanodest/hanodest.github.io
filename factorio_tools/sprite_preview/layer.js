@@ -1,5 +1,6 @@
-import { Vector } from './vector.js';
 import { BoundingBox } from './bounding_box.js';
+import { ImageFile } from './imageFile.js';
+import { Vector } from './vector.js';
 
 function toUint8(x) {
   return Math.max(0, Math.min(255, Math.round(x)));
@@ -69,9 +70,12 @@ function createDimensionsRow(elements) {
 }
 
 class Layer extends EventTarget {
-  #context;
+  #imageFiles;
 
   #container;
+  #fileList;
+  #fileListTitle;
+
   #blendMode;
   #drawMode;
   #tintColor;
@@ -80,9 +84,11 @@ class Layer extends EventTarget {
   #shift;
   #lineLength;
   #frameCount;
+  #frameCountInput;
 
   constructor(settings) {
     super();
+    this.#imageFiles = [];
 
     this.#lineLength = settings.lineLength;
     this.#frameCount = settings.frameCount;
@@ -94,7 +100,7 @@ class Layer extends EventTarget {
     this.#container.addEventListener('dragstart', (event) => {
       let elementIndex =
         Array.from(this.#container.parentNode.children).indexOf(this.#container);
-      event.dataTransfer.setData("text/plain", elementIndex);
+      event.dataTransfer.setData('text/plain', elementIndex);
     });
     this.#container.addEventListener('dragenter', (event) => {
       event.preventDefault();
@@ -116,7 +122,6 @@ class Layer extends EventTarget {
       }
       event.preventDefault();
     });
-
     this.#container.classList.add('collapsed');
 
     let collapseButton = document.createElement('div');
@@ -138,6 +143,39 @@ class Layer extends EventTarget {
       this.dispatchEvent(new CustomEvent('delete'));
     });
 
+    let fileListContainer = document.createElement('div');
+    fileListContainer.classList.add('inner-collapsed');
+
+    let fileListBar = document.createElement('div');
+    fileListBar.classList.add('right-aligned');
+    let fileCollapseButton = document.createElement('div');
+    fileCollapseButton.classList.add('collapse-icon');
+    fileCollapseButton.addEventListener('click', () => {
+      fileListContainer.classList.toggle('inner-collapsed');
+    });
+    this.#fileListTitle = document.createElement('div');
+    this.#fileListTitle.innerText = 'Spritesheets: 0';
+    let addSpritesheetsInput = document.createElement('input');
+    addSpritesheetsInput.type = 'file';
+    addSpritesheetsInput.accept = 'image/*';
+    addSpritesheetsInput.addEventListener('change', () => {
+      for (let file of addSpritesheetsInput.files) {
+        this.addImage(ImageFile.fromFile(file));
+      }
+      addSpritesheetsInput.value = '';
+    });
+    let addSpritesheetsButton = document.createElement('div');
+    addSpritesheetsButton.classList.add('add-icon');
+    addSpritesheetsButton.addEventListener('click', () => {
+      addSpritesheetsInput.click();
+    });
+    fileListBar.replaceChildren(addSpritesheetsButton, this.#fileListTitle, fileCollapseButton);
+
+    this.#fileList = document.createElement('div');
+    this.#fileList.classList.add('inner-collapsible');
+
+    fileListContainer.replaceChildren(fileListBar, this.#fileList);
+
     let dimensionsTable = document.createElement('div');
     dimensionsTable.classList.add('dimensions-table');
     let sizeRow = createDimensionsRow([
@@ -152,9 +190,10 @@ class Layer extends EventTarget {
       'Shift y:',
       createNumberInput(-1000, 1000, () => this.#shift.y, (y) => { this.#shift.y = y; }),
     ]);
+    this.#frameCountInput =
+      createNumberInput(1, 1024, () => this.#frameCount, (f) => { this.#frameCount = f; });
     let framesRow = createDimensionsRow([
-      'Frames:',
-      createNumberInput(1, 1024, () => this.#frameCount, (f) => { this.#frameCount = f; }),
+      'Frames:', this.#frameCountInput,
       'Per line:',
       createNumberInput(1, 64, () => this.#lineLength, (l) => { this.#lineLength = l; })
     ]);
@@ -181,22 +220,64 @@ class Layer extends EventTarget {
     colorControls.replaceChildren(this.#tintColor, this.#drawMode, this.#blendMode);
 
     let layerSettings = document.createElement('div');
-    layerSettings.classList.add('layer-settings');
-    layerSettings.replaceChildren(dimensionsContainer, colorControls);
+    layerSettings.classList.add('collapsible');
+    layerSettings.replaceChildren(fileListContainer, dimensionsContainer, colorControls);
 
     this.#container.replaceChildren(labelRow, layerSettings);
   }
 
-  addImage(imageName, context) {
-    this.#context = context;
+  addImage(imageFile) {
+    this.#imageFiles.push(imageFile);
+    this.#fileList.appendChild(imageFile.container);
+    this.#fileListTitle.innerText = 'Spritesheets: ' + this.#imageFiles.length;
+    if (typeof (imageFile.context) != 'undefined') {
+      this.updateFrameCount(imageFile.context.canvas.height);
+    }
+
+    imageFile.addEventListener('loaded', () => {
+      if (typeof (imageFile.context) != 'undefined') {
+        this.updateFrameCount(imageFile.context.canvas.height);
+      }
+    });
+    imageFile.addEventListener('delete', () => {
+      this.#imageFiles = this.#imageFiles.filter((f) => f !== imageFile);
+      this.#fileList.removeChild(imageFile.container);
+      this.#fileListTitle.innerText = 'Spritesheets: ' + this.#imageFiles.length;
+      if (typeof (imageFile.context) != 'undefined') {
+        this.updateFrameCount(-imageFile.context.canvas.height);
+      }
+    });
   }
 
-  draw(frame, boundingBox, image, lightmap) {
+  updateFrameCount(imgHeight) {
+    let frameDiff = Math.trunc(imgHeight / this.#size.y) * this.#lineLength;
+    this.#frameCount = Math.max(0, this.#frameCount + frameDiff);
+    this.#frameCountInput.value = this.#frameCount;
+  }
+
+  getFrameData(frame) {
     frame = frame % this.#frameCount;
     let column = frame % this.#lineLength;
     let row = Math.floor(frame / this.#lineLength);
-    let data = this.#context.getImageData(
-      this.#size.x * column, this.#size.y * row, this.#size.x, this.#size.y);
+    for (let i = 0; i < this.#imageFiles.length; i++) {
+      let context = this.#imageFiles[i].context;
+      if (typeof (context) == 'undefined') {
+        continue;
+      }
+      let numFileRows = Math.floor(context.canvas.height / this.#size.y);
+      if (row < numFileRows) {
+        return context.getImageData(
+          this.#size.x * column, this.#size.y * row, this.#size.x, this.#size.y);
+      }
+      row -= numFileRows;
+    }
+  }
+
+  draw(frame, boundingBox, image, lightmap) {
+    let data = this.getFrameData(frame);
+    if (typeof (data) == 'undefined') {
+      return;
+    }
     let shift = this.boundingBox.topLeft.subtract(boundingBox.topLeft);
     let drawMode = this.drawMode;
     if (drawMode == 'sprite' || drawMode == 'glow') {
@@ -267,12 +348,12 @@ class Layer extends EventTarget {
     if (this.drawMode != 'shadow') {
       return;
     }
-    frame = frame % this.#frameCount;
-    let column = frame % this.#lineLength;
-    let row = Math.floor(frame / this.#lineLength);
-    let width = this.#size.x;
-    let height = this.#size.y;
-    let data = this.#context.getImageData(width * column, height * row, width, height);
+    let data = this.getFrameData(frame);
+    if (typeof (data) == 'undefined') {
+      return;
+    }
+    let width = data.width;
+    let height = data.height;
     let shift = this.boundingBox.topLeft.subtract(boundingBox.topLeft);
     for (let x = 0; x < width; x++) {
       for (let y = 0; y < height; y++) {
