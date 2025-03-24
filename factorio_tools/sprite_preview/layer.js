@@ -50,6 +50,7 @@ function createNumberInput(min, max, get, set) {
       return;
     }
     set(Math.max(min, Math.min(max, parseInt(result.value))));
+    result.value = get();
   });
   return result;
 }
@@ -193,15 +194,15 @@ class Layer extends EventTarget {
     dimensionsTable.classList.add('dimensions-table');
     let sizeRow = createDimensionsRow([
       'Width:',
-      createNumberInput(1, image.width, () => this.#size.x, (x) => { this.#size.x = x; }),
+      createNumberInput(1, 2048, () => this.#size.x, (x) => { this.#size.x = x; }),
       'Height:',
-      createNumberInput(1, image.height, () => this.#size.y, (y) => { this.#size.y = y; })
+      createNumberInput(1, 2048, () => this.#size.y, (y) => { this.#size.y = y; })
     ]);
     let shiftRow = createDimensionsRow([
       'Shift x:',
-      createNumberInput(-1000, 1000, () => this.#shift.x, (x) => { this.#shift.x = x; }),
+      createNumberInput(-1024, 1024, () => this.#shift.x, (x) => { this.#shift.x = x; }),
       'Shift y:',
-      createNumberInput(-1000, 1000, () => this.#shift.y, (y) => { this.#shift.y = y; }),
+      createNumberInput(-1024, 1024, () => this.#shift.y, (y) => { this.#shift.y = y; }),
     ]);
     this.#frameCountInput =
       createNumberInput(1, 1024, () => this.#frameCount, (f) => { this.#frameCount = f; });
