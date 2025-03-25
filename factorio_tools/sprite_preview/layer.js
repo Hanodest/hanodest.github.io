@@ -1,5 +1,6 @@
 import { BoundingBox } from './bounding_box.js';
 import { ImageFile } from './imageFile.js';
+import { NumberInput } from './numberInput.js';
 import { Vector } from './vector.js';
 
 function toUint8(x) {
@@ -38,34 +39,13 @@ function createDrawSelect() {
   ]);
 }
 
-function createNumberInput(min, max, get, set) {
-  let result = document.createElement('input');
-  result.type = 'number';
-  result.min = min;
-  result.max = max;
-  result.value = get();
-  result.addEventListener('change', () => {
-    if (result.value == '') {
-      result.value = get();
-      return;
-    }
-    set(Math.max(min, Math.min(max, parseInt(result.value))));
-    result.value = get();
-  });
-  return result;
-}
-
 function createDimensionsRow(elements) {
   let row = document.createElement('div');
   row.classList.add('dimensions-row');
   elements.forEach((e) => {
     let column = document.createElement('div');
     column.classList.add('dimensions-column');
-    if (typeof (e) == 'string') {
-      column.innerText = e;
-    } else {
-      column.appendChild(e);
-    }
+    column.appendChild(e.container);
     row.appendChild(column);
   });
   return row;
@@ -82,20 +62,17 @@ class Layer extends EventTarget {
   #drawMode;
   #tintColor;
 
-  #size;
-  #shift;
+  #sizeX;
+  #sizeY;
+  #shiftX;
+  #shiftY;
   #lineLength;
+  #linesPerFile;
   #frameCount;
-  #frameCountInput;
 
   constructor(settings) {
     super();
     this.#imageFiles = [];
-
-    this.#lineLength = settings.lineLength;
-    this.#frameCount = settings.frameCount;
-    this.#size = settings.size;
-    this.#shift = settings.shift;
 
     this.#container = document.createElement('div');
     this.#container.classList.add('layer');
@@ -178,8 +155,7 @@ class Layer extends EventTarget {
       this.#imageFiles = [];
       this.#fileList.replaceChildren();
       this.#fileListTitle.innerText = 'Spritesheets: 0';
-      this.#frameCount = 0;
-      this.#frameCountInput.value = this.#frameCount;
+      this.#frameCount.reset(0);
     });
 
     fileListBar.replaceChildren(
@@ -192,26 +168,24 @@ class Layer extends EventTarget {
 
     let dimensionsTable = document.createElement('div');
     dimensionsTable.classList.add('dimensions-table');
-    let sizeRow = createDimensionsRow([
-      'Width:',
-      createNumberInput(1, 2048, () => this.#size.x, (x) => { this.#size.x = x; }),
-      'Height:',
-      createNumberInput(1, 2048, () => this.#size.y, (y) => { this.#size.y = y; })
-    ]);
-    let shiftRow = createDimensionsRow([
-      'Shift x:',
-      createNumberInput(-1024, 1024, () => this.#shift.x, (x) => { this.#shift.x = x; }),
-      'Shift y:',
-      createNumberInput(-1024, 1024, () => this.#shift.y, (y) => { this.#shift.y = y; }),
-    ]);
-    this.#frameCountInput =
-      createNumberInput(1, 1024, () => this.#frameCount, (f) => { this.#frameCount = f; });
-    let framesRow = createDimensionsRow([
-      'Frames:', this.#frameCountInput,
-      'Per line:',
-      createNumberInput(1, 64, () => this.#lineLength, (l) => { this.#lineLength = l; })
-    ]);
-    dimensionsTable.replaceChildren(sizeRow, shiftRow, framesRow);
+
+    this.#sizeX = new NumberInput('Width:', 1, 2048, settings.size.x);
+    this.#sizeX.addEventListener('change', () => { this.#updateDimensions(); });
+    this.#sizeY = new NumberInput('Height:', 1, 2048, settings.size.y);
+    this.#sizeY.addEventListener('change', () => { this.#updateDimensions(); });
+    this.#shiftX = new NumberInput('Shift x:', -1024, 1024, settings.shift.x);
+    this.#shiftY = new NumberInput('Shift y:', -1024, 1024, settings.shift.y);
+
+    this.#lineLength = new NumberInput('Columns:', 1, 64, settings.lineLength);
+    this.#lineLength.addEventListener('change', () => { this.#updateSize(); });
+    this.#linesPerFile = new NumberInput('Rows:', 1, 64, settings.lineLength);
+    this.#linesPerFile.addEventListener('change', () => { this.#updateSize(); });
+    this.#frameCount = new NumberInput('Frames:', 1, 1024, settings.frameCount);
+
+    let sizeRow = createDimensionsRow([this.#sizeX, this.#sizeY, this.#shiftX, this.#shiftY]);
+    let framesRow = createDimensionsRow([this.#lineLength, this.#linesPerFile, this.#frameCount]);
+
+    dimensionsTable.replaceChildren(sizeRow, framesRow);
     let dimensionsContainer = document.createElement('div');
     dimensionsContainer.classList.add('right-aligned');
     dimensionsContainer.appendChild(dimensionsTable);
@@ -244,47 +218,67 @@ class Layer extends EventTarget {
     this.#imageFiles.push(imageFile);
     this.#fileList.appendChild(imageFile.container);
     this.#fileListTitle.innerText = 'Spritesheets: ' + this.#imageFiles.length;
-    if (typeof (imageFile.context) != 'undefined') {
-      this.updateFrameCount(imageFile.context.canvas.height);
-    }
-
+    this.#updateFrameCount();
     imageFile.addEventListener('loaded', () => {
-      if (typeof (imageFile.context) != 'undefined') {
-        this.updateFrameCount(imageFile.context.canvas.height);
-      }
+      this.#updateFrameCount();
     });
     imageFile.addEventListener('delete', () => {
       this.#imageFiles = this.#imageFiles.filter((f) => f !== imageFile);
       this.#fileList.removeChild(imageFile.container);
       this.#fileListTitle.innerText = 'Spritesheets: ' + this.#imageFiles.length;
-      if (typeof (imageFile.context) != 'undefined') {
-        this.updateFrameCount(-imageFile.context.canvas.height);
-      }
+      this.#updateFrameCount();
     });
   }
 
-  updateFrameCount(imgHeight) {
-    let frameDiff = Math.trunc(imgHeight / this.#size.y) * this.#lineLength;
-    this.#frameCount = Math.max(0, this.#frameCount + frameDiff);
-    this.#frameCountInput.value = this.#frameCount;
+  #updateDimensions() {
+    let size = this.#getSpritesheetSize();
+    if (typeof (size) == 'undefined') {
+      return;
+    }
+    this.#lineLength.safe_reset(Math.floor(size.x / this.#sizeX.value));
+    this.#linesPerFile.safe_reset(Math.floor(size.y / this.#sizeY.value));
+    this.#updateFrameCount();
+  }
+
+  #updateSize() {
+    let size = this.#getSpritesheetSize();
+    if (typeof (size) == 'undefined') {
+      return;
+    }
+    this.#sizeX.safe_reset(Math.floor(size.x / this.#lineLength.value));
+    this.#sizeY.safe_reset(Math.floor(size.y / this.#linesPerFile.value));
+    this.#updateFrameCount();
+  }
+
+  #updateFrameCount() {
+    let count = 0;
+    this.#imageFiles.forEach((image) => {
+      let size = image.size;
+      if (typeof (size) != 'undefined') {
+        count += Math.floor(size.y / this.#size.y);
+      }
+    });
+    this.#frameCount.reset(count * this.#lineLength.value);
+  }
+
+  #getSpritesheetSize() {
+    if (typeof (this.#imageFiles[0]) == 'undefined') {
+      return undefined;
+    }
+    return this.#imageFiles[0].size;
   }
 
   getFrameData(frame) {
-    frame = frame % this.#frameCount;
-    let column = frame % this.#lineLength;
-    let row = Math.floor(frame / this.#lineLength);
-    for (let i = 0; i < this.#imageFiles.length; i++) {
-      let context = this.#imageFiles[i].context;
-      if (typeof (context) == 'undefined') {
-        continue;
-      }
-      let numFileRows = Math.floor(context.canvas.height / this.#size.y);
-      if (row < numFileRows) {
-        return context.getImageData(
-          this.#size.x * column, this.#size.y * row, this.#size.x, this.#size.y);
-      }
-      row -= numFileRows;
+    frame = frame % this.#frameCount.value;
+    let column = frame % this.#lineLength.value;
+    let row = Math.floor(frame / this.#lineLength.value);
+    let imageFile = this.#imageFiles[Math.trunc(row / this.#linesPerFile.value)];
+    if (typeof (imageFile) == 'undefined' || typeof (imageFile.context) == 'undefined') {
+      return undefined;
     }
+    row = row % this.#linesPerFile.value;
+    return imageFile.context.getImageData(
+      this.#size.x * column, this.#size.y * row, this.#size.x, this.#size.y);
   }
 
   draw(frame, boundingBox, image, lightmap) {
@@ -391,8 +385,9 @@ class Layer extends EventTarget {
       'blend_mode': this.blendMode,
       'width': this.#size.x,
       'height': this.#size.y,
-      'line_length': this.#lineLength,
-      'frame_count': this.#frameCount,
+      'line_length': this.#lineLength.value,
+      'lines_per_file': this.#linesPerFile.value,
+      'frame_count': this.#frameCount.value,
       'shift': [
         (this.#shift.x + this.#size.x % 2) / 64,
         (this.#shift.y + this.#size.y % 2) / 64
@@ -408,6 +403,14 @@ class Layer extends EventTarget {
     result.tint = this.tint.map((color) => color / 255);
     result.tint.push(1);
     return result;
+  }
+
+  get #size() {
+    return new Vector(this.#sizeX.value, this.#sizeY.value);
+  }
+
+  get #shift() {
+    return new Vector(this.#shiftX.value, this.#shiftY.value);
   }
 
   get blendMode() {

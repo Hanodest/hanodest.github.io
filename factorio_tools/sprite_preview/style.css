@@ -148,6 +148,10 @@ input[type="number"] {
     -moz-appearance: textfield;
 }
 
+.number-input-caption {
+  margin: 4px;
+}
+
 .dimensions-container {
   display: flex;
   flex-direction: row-reverse;

@@ -1,4 +1,5 @@
 import { loadImage } from './image.js';
+import { Vector } from './vector.js';
 
 class ImageFile extends EventTarget {
   #context;
@@ -69,6 +70,13 @@ class ImageFile extends EventTarget {
     let result = new ImageFile(file.name);
     result.reloadFromFile(file);
     return result;
+  }
+
+  get size() {
+    if (typeof (this.#context) == 'undefined') {
+      return undefined;
+    }
+    return new Vector(this.#context.canvas.width, this.#context.canvas.height);
   }
 
   get filename() {

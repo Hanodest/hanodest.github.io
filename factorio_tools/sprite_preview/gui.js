@@ -15,6 +15,7 @@ function createLayerSettings(imageName, context) {
     shift: new Vector(0, 0),
     frameCount: 0,
     lineLength: numColumns,
+    linesPerFile: numRows,
     blendMode: 'normal',
     drawMode: 'sprite',
     tint: '#ffffff',
