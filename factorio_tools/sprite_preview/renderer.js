@@ -103,6 +103,14 @@ class Renderer {
     }
     context.putImageData(data, 0, 0);
   }
+
+  exportSettings() {
+    return {
+      "layers": this.#layers
+        .map((layer) => layer.exportSettings())
+        .filter((e) => e !== undefined)
+    };
+  }
 };
 
 export { Renderer };

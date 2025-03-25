@@ -71,6 +71,10 @@ class ImageFile extends EventTarget {
     return result;
   }
 
+  get filename() {
+    return this.#filename;
+  }
+
   get container() {
     return this.#container;
   }

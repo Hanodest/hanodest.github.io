@@ -380,6 +380,36 @@ class Layer extends EventTarget {
     }
   }
 
+  exportSettings() {
+    if (this.drawMode == 'hidden') {
+      return undefined;
+    }
+    let result = {
+      'priority': 'high',
+      'scale': 0.5,
+      'filenames': this.#imageFiles.map((f) => f.filename),
+      'blend_mode': this.blendMode,
+      'width': this.#size.x,
+      'height': this.#size.y,
+      'line_length': this.#lineLength,
+      'frame_count': this.#frameCount,
+      'shift': [
+        (this.#shift.x + this.#size.x % 2) / 64,
+        (this.#shift.y + this.#size.y % 2) / 64
+      ]
+    };
+    if (this.drawMode == 'light') {
+      result['draw_as_light'] = true;
+    } else if (this.drawMode == 'glow') {
+      result['draw_as_glow'] = true;
+    } else if (this.drawMode == 'shadow') {
+      result['draw_as_shadow'] = true;
+    }
+    result.tint = this.tint.map((color) => color / 255);
+    result.tint.push(1);
+    return result;
+  }
+
   get blendMode() {
     return this.#blendMode.value;
   }

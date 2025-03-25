@@ -115,6 +115,13 @@ class Gui {
     layer.addImage(ImageFile.fromResolvedContext(imageName, context));
   }
 
+  exportSettings() {
+    navigator.clipboard.writeText(JSON.stringify(
+      this.#renderer.exportSettings(),
+      /*replacer=*/undefined, /*space=*/2)
+    );
+  }
+
   loadFromFile(file) {
     if (typeof (file) == 'undefined') {
       return;
@@ -136,6 +143,9 @@ class Gui {
     });
     document.getElementById('add_layer').addEventListener('click', () => {
       fileInput.click();
+    });
+    document.getElementById('export_settings').addEventListener('click', () => {
+      this.exportSettings();
     });
   }
 
