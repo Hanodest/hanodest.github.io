@@ -76,10 +76,9 @@ class Gui {
 
   addLayer(layerSettings) {
     let layer = new Layer(layerSettings);
-    this.#layersSettings.appendChild(layer.container);
     layer.addEventListener('delete', () => {
-      this.#layersSettings.removeChild(layer.container);
       this.#renderer.removeLayer(layer);
+      this.redraw();
       if (this.#layersSettings.childElementCount == 0) {
         this.reset();
       }
@@ -87,17 +86,19 @@ class Gui {
     layer.addEventListener('moveLayer', (event) => {
       let dragStart = event.detail.dragStart;
       let dragEnd = event.detail.dragEnd;
-      let moveFrom = this.#layersSettings.children[dragStart];
-      let moveTo = this.#layersSettings.children[dragEnd + (dragStart < dragEnd ? 1 : 0)];
-      if (typeof (moveTo) == 'undefined') {
-        this.#layersSettings.appendChild(moveFrom);
-      } else {
-        this.#layersSettings.insertBefore(moveFrom, moveTo);
-      }
       this.#renderer.moveLayer(dragStart, dragEnd);
+      this.redraw();
     });
     this.#renderer.addLayer(layer);
+    this.redraw();
     return layer;
+  }
+
+  redraw() {
+    this.#layersSettings.replaceChildren();
+    this.#renderer.layers.forEach((layer) => {
+      this.#layersSettings.appendChild(layer.container);
+    });
   }
 
   async loadImage(imageName, imageUrl) {

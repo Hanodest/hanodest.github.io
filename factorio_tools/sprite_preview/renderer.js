@@ -111,6 +111,10 @@ class Renderer {
         .filter((e) => e !== undefined)
     };
   }
+
+  get layers() {
+    return this.#layers;
+  }
 };
 
 export { Renderer };
