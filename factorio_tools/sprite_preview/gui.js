@@ -131,6 +131,11 @@ class Gui {
     if (typeof (file) == 'undefined') {
       return;
     }
+    for (let layer of this.#renderer.layers) {
+      if (layer.tryResolveImage(file)) {
+        return;
+      }
+    }
     let file_reader = new FileReader();
     file_reader.addEventListener('load', () => {
       this.loadImage(file.name, file_reader.result);

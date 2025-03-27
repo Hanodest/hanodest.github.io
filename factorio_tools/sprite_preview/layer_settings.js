@@ -1,5 +1,5 @@
 import { detectSpriteSize } from './image.js';
-import { clamp, toHex } from './util.js';
+import { basename, clamp, toHex } from './util.js';
 import { Vector } from './vector.js';
 
 function detectLayerSettings(imageName, context) {
@@ -24,13 +24,13 @@ function detectLayerSettings(imageName, context) {
 function parseSingleLayerSettings(input) {
   let result = {};
   if (typeof (input.filename) == 'string') {
-    result.title = input.filename;
-    result.filenames = [input.filename];
+    result.title = basename(input.filename);
+    result.filenames = [result.title];
   } else if (input.filename !== undefined) {
     return undefined;
   }
   if (Array.isArray(input.filenames)) {
-    result.filenames = input.filenames;
+    result.filenames = input.filenames.map(basename);
     if (result.title === undefined) {
       result.title = input.filenames[0];
     }
@@ -38,7 +38,6 @@ function parseSingleLayerSettings(input) {
   if (result.filenames === undefined) {
     return undefined;
   }
-  result.title = result.title !== undefined ? result.title.split('/').pop() : '';
   if (Array.isArray(input.size)) {
     result.size = new Vector(input.size[0], input.size[1]);
   } else if (typeof (input.width) == 'number' && typeof (input.height) == 'number') {

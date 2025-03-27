@@ -6,4 +6,11 @@ function toHex(number, digits) {
   return number.toString(16).padStart(digits, '0');
 }
 
-export { clamp, toHex };
+function basename(path) {
+  if (path === undefined) {
+    return undefined;
+  }
+  return path.split('/').pop();
+}
+
+export { basename, clamp, toHex };

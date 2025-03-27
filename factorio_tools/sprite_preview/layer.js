@@ -212,6 +212,10 @@ class Layer extends EventTarget {
     layerSettings.replaceChildren(fileListContainer, dimensionsContainer, colorControls);
 
     this.#container.replaceChildren(labelRow, layerSettings);
+
+    settings.filenames.forEach((filename) => {
+      this.addImage(new ImageFile(filename));
+    });
   }
 
   addImage(imageFile) {
@@ -228,6 +232,16 @@ class Layer extends EventTarget {
       this.#fileListTitle.innerText = 'Spritesheets: ' + this.#imageFiles.length;
       this.#updateFrameCount();
     });
+  }
+
+  tryResolveImage(file) {
+    for (let imageFile of this.#imageFiles) {
+      if (imageFile.context === undefined && imageFile.filename == file.name) {
+        imageFile.reloadFromFile(file);
+        return true;
+      }
+    }
+    return false;
   }
 
   #updateDimensions() {
