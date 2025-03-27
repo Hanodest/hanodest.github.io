@@ -30,6 +30,10 @@ class Renderer {
     this.#layers.splice(to, 0, layerToMove);
   }
 
+  clear() {
+    this.#layers = [];
+  }
+
   draw(frame, light, backgroundName, context) {
     let boundingBox = this.#layers.length == 0
       ? new BoundingBox(new Vector(-64, -64), new Vector(64, 64))

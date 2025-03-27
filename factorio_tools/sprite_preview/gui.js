@@ -1,26 +1,8 @@
-import { detectSpriteSize, loadImage } from './image.js';
+import { detectLayerSettings, parseLayerSettings } from './layer_settings.js';
+import { loadImage } from './image.js';
 import { ImageFile } from './imageFile.js';
 import { Layer } from './layer.js';
 import { Renderer } from './renderer.js';
-import { Vector } from './vector.js';
-
-function createLayerSettings(imageName, context) {
-  let canvas = context.canvas;
-  let [numRows, numColumns] = detectSpriteSize(
-    context.getImageData(0, 0, canvas.width, canvas.height));
-
-  return {
-    title: imageName,
-    size: new Vector(canvas.width / numColumns, canvas.height / numRows),
-    shift: new Vector(0, 0),
-    frameCount: 0,
-    lineLength: numColumns,
-    linesPerFile: numRows,
-    blendMode: 'normal',
-    drawMode: 'sprite',
-    tint: '#ffffff',
-  };
-}
 
 class Gui {
   #renderer;
@@ -99,20 +81,24 @@ class Gui {
     this.#renderer.layers.forEach((layer) => {
       this.#layersSettings.appendChild(layer.container);
     });
+
+    if (this.#renderer.layers.length == 0) {
+      this.reset();
+    } else {
+      this.#controls.classList.remove('hidden');
+      if (this.#renderLoop === undefined) {
+        this.#renderLoop = setTimeout(() => { this.drawSprite(); }, 0);
+      }
+    }
   }
 
   async loadImage(imageName, imageUrl) {
     let image = await loadImage(imageUrl);
-    if (this.#layersSettings.childElementCount == 0) {
-      this.#controls.classList.remove('hidden');
-      setTimeout(() => { this.drawSprite(); }, 0);
-    }
-
     let canvas = new OffscreenCanvas(image.width, image.height);
     let context = canvas.getContext('2d', { willReadFrequently: true });
     context.drawImage(image, 0, 0);
 
-    let layerSettings = createLayerSettings(imageName, context);
+    let layerSettings = detectLayerSettings(imageName, context);
     let layer = this.addLayer(layerSettings);
     layer.addImage(ImageFile.fromResolvedContext(imageName, context));
   }
@@ -122,6 +108,23 @@ class Gui {
       this.#renderer.exportSettings(),
       /*replacer=*/undefined, /*space=*/2)
     );
+  }
+
+  importSettings() {
+    try {
+      navigator.clipboard.readText().then((text) => {
+        let parsedSettings = parseLayerSettings(text);
+        if (parsedSettings !== undefined) {
+          this.#renderer.clear();
+          parsedSettings.forEach((settings) => {
+            this.addLayer(settings);
+          });
+          if (this.#renderer.layers.length == 0) {
+            this.reset();
+          }
+        }
+      });
+    } catch (e) { }
   }
 
   loadFromFile(file) {
@@ -148,6 +151,9 @@ class Gui {
     });
     document.getElementById('export_settings').addEventListener('click', () => {
       this.exportSettings();
+    });
+    document.getElementById('import_settings').addEventListener('click', () => {
+      this.importSettings();
     });
   }
 
