@@ -1,8 +1,10 @@
-import { detectLayerSettings, parseLayerSettings } from './layer_settings.js';
+import { detectLayerSettings } from './layer_settings.js';
 import { loadImage } from './image.js';
 import { ImageFile } from './imageFile.js';
 import { Layer } from './layer.js';
 import { Renderer } from './renderer.js';
+import { ExportUi } from './export_ui.js';
+import { ImportUi } from './import_ui.js';
 
 class Gui {
   #renderer;
@@ -15,6 +17,9 @@ class Gui {
   #layersSettings;
   #canvas;
   #context;
+
+  #exportUi;
+  #importUi;
 
   constructor() {
     this.#renderer = new Renderer();
@@ -29,6 +34,12 @@ class Gui {
 
     this.#canvas = document.getElementById('image');
     this.#context = this.#canvas.getContext('2d', { willReadFrequently: true });
+
+    this.#exportUi = new ExportUi();
+    this.#importUi = new ImportUi();
+    this.#importUi.addEventListener('settingsImported', (event) => {
+      this.importSettings(event.detail);
+    });
 
     this.setupHandlers();
     this.reset();
@@ -103,28 +114,14 @@ class Gui {
     layer.addImage(ImageFile.fromResolvedContext(imageName, context));
   }
 
-  exportSettings() {
-    navigator.clipboard.writeText(JSON.stringify(
-      this.#renderer.exportSettings(),
-      /*replacer=*/undefined, /*space=*/2)
-    );
-  }
-
-  importSettings() {
-    try {
-      navigator.clipboard.readText().then((text) => {
-        let parsedSettings = parseLayerSettings(text);
-        if (parsedSettings !== undefined) {
-          this.#renderer.clear();
-          parsedSettings.forEach((settings) => {
-            this.addLayer(settings);
-          });
-          if (this.#renderer.layers.length == 0) {
-            this.reset();
-          }
-        }
-      });
-    } catch (e) { }
+  importSettings(parsedSettings) {
+    this.#renderer.clear();
+    parsedSettings.forEach((settings) => {
+      this.addLayer(settings);
+    });
+    if (this.#renderer.layers.length == 0) {
+      this.reset();
+    }
   }
 
   loadFromFile(file) {
@@ -155,10 +152,10 @@ class Gui {
       fileInput.click();
     });
     document.getElementById('export_settings').addEventListener('click', () => {
-      this.exportSettings();
+      this.#exportUi.show(this.#renderer.exportSettings());
     });
     document.getElementById('import_settings').addEventListener('click', () => {
-      this.importSettings();
+      this.#importUi.show();
     });
   }
 

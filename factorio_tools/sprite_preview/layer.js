@@ -117,7 +117,7 @@ class Layer extends EventTarget {
     dragBlock.classList.add('drag-block');
 
     let closeButton = document.createElement('div');
-    closeButton.classList.add('close-icon');
+    closeButton.classList.add('close-icon-small');
     closeButton.addEventListener('click', () => {
       this.dispatchEvent(new CustomEvent('delete'));
     });
