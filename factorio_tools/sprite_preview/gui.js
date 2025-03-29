@@ -61,10 +61,13 @@ class Gui {
 
   drawSprite() {
     let dayNight = parseInt(document.getElementById('day_night').value);
+    let frameStart = performance.now();
     this.#renderer.draw(this.#frame++, 255 - dayNight, this.#background.value, this.#context);
+    let frameEnd = performance.now();
 
     let animationSpeed = parseInt(this.#animationSpeed.value);
-    this.#renderLoop = setTimeout(() => { this.drawSprite(); }, 1000 / animationSpeed);
+    this.#renderLoop = setTimeout(() => { this.drawSprite(); },
+      Math.max(0, 1000 / animationSpeed - (frameEnd - frameStart)));
   }
 
   addLayer(layerSettings) {
