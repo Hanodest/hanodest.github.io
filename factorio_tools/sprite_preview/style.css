@@ -293,6 +293,11 @@ input[type="range"]::-moz-range-thumb {
   cursor: pointer;
 }
 
+.missing-file div.file-name {
+  text-decoration: line-through;
+  color: #8e8e8e;
+}
+
 textarea {
   box-sizing: border-box;
   width: 100%;

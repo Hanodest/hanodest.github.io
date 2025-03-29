@@ -16,6 +16,7 @@ class ImageFile extends EventTarget {
     this.#filename = filename;
 
     this.#title = document.createElement('div');
+    this.#title.classList.add('file-name');
     this.#title.innerText = this.#filename;
 
     let deleteButton = document.createElement('div');
@@ -38,7 +39,7 @@ class ImageFile extends EventTarget {
     });
 
     this.#container = document.createElement('div');
-    this.#container.classList.add('image-file', 'right-aligned');
+    this.#container.classList.add('image-file', 'right-aligned', 'missing-file');
     this.#container.replaceChildren(deleteButton, replaceButton, this.#title);
   }
 
@@ -53,6 +54,7 @@ class ImageFile extends EventTarget {
         this.#title.innerText = file.name;
         let canvas = new OffscreenCanvas(image.width, image.height);
         this.#context = canvas.getContext('2d', { willReadFrequently: true });
+        this.#container.classList.remove('missing-file');
         this.#context.drawImage(image, 0, 0);
         this.dispatchEvent(new CustomEvent('loaded'));
       });
@@ -63,6 +65,7 @@ class ImageFile extends EventTarget {
   static fromResolvedContext(filename, context) {
     let result = new ImageFile(filename);
     result.#context = context;
+    result.#container.classList.remove('missing-file');
     return result;
   }
 
