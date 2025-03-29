@@ -28,6 +28,7 @@ class ImportUi extends EventTarget {
     this.#footer.replaceChildren(confirmButton, this.#errorMessage);
 
     this.#container = document.createElement('div');
+    this.#container.classList.add('import-ui');
     this.#container.replaceChildren(this.#text, this.#footer);
 
     this.#overlay = new Overlay(this);

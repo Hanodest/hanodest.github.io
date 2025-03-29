@@ -226,6 +226,10 @@ input[type="number"] {
   display: flex;
   flex-direction: row-reverse;
 }
+.flex-horizontal {
+  display: flex;
+  flex-direction: row;
+}
 .flex-vertical {
   display: flex;
   flex-direction: column;
@@ -279,7 +283,6 @@ input[type="range"]::-moz-range-thumb {
 }
 
 textarea {
-  margin: 4px;
   width: 800px;
   height: 600px;
   resize: none;
@@ -288,6 +291,11 @@ textarea {
 }
 textarea:focus {
   background-color: #f0dab4;
+}
+
+.import-ui,
+.export-ui {
+  margin: 4px;
 }
 
 .error-message {
@@ -303,4 +311,16 @@ textarea:focus {
   width: 100%;
   height: 100%;
   background-color: rgba(64, 64, 64, 0.8);
+}
+
+.tab-header {
+  border-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABEAAAARCAQAAACRZI9xAAAAAXNSR0IB2cksfwAAAARnQU1BAACxjwv8YQUAAAAgY0hSTQAAeiYAAICEAAD6AAAAgOgAAHUwAADqYAAAOpgAABdwnLpRPAAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB+kDHQAAM6ecdG4AAAEeSURBVHjaTIrFQQRBFEQ7lIlm0tgA2Ctyw30Ud4djX3B3+oS7h7AyARQP3++/6pnfuPQfwhf3VnzXW/HFPYSXvqmMbc8FZ9m1bsirr3mts8wF294PYL212V0d60QH2tUWfcB9zF6btd/QfGC1RFotaFJj9IJ+lfkAIPWHs2nNYfQrVpc66Zh7Em1aw1nqm6YwUC9S8mOTYvP3owdqCk2Na1AHZ7cw2CENxB+gN6jGmXyxTk1q5/0Goh+oA61JdcoXTU5VHM1I3QIggbg70OrwcvpoVCpsAAZgEOH/X+futHNPBf1R4YD+dQawQ4fWpjmMe0rpRo1quv1Ie0aJEoXuMO6pSC/kyC6TzyUqTqdJbGIb53JVY2ZxZBOeULUMI0NmXedDSDxiAAAAAElFTkSuQmCC") 8/4px repeat;
+  background-color: #8e8e8e;
+  padding: 8px;
+  font-weight: bold;
+}
+.tab-header.active {
+  border-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABEAAAARCAYAAAA7bUf6AAAAAXNSR0IB2cksfwAAAARnQU1BAACxjwv8YQUAAAAgY0hSTQAAeiYAAICEAAD6AAAAgOgAAHUwAADqYAAAOpgAABdwnLpRPAAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB+kDHQACLBiiGxkAAAE9SURBVHjarZNBTsMwEEWn3sIlWHGAsuwtkFrVosk5egDW3IHrwE26qNrg2LHtBL+Fo5AFitRa+prOzH9fcpoomZ26qo+Ht8O31rrZ7Xb9drsdqPTM2c8ZNcJ1vdF7/dU0zbsxZu2ce/Ter0IIQqVnzh4f/j8hVVVt2rb9vFwuLwBZ4qxDYls7/mbOHh9+uBKC8eN8Pj/5kOHOiTFGmp9GrtfrKHrm7PHhh4NXeq+Pp9NpHXyQrusIxCytacVaO4qeOXt8+OHgVV68ZhNXEN95ocYYpe97GYZBOFR65lMfHLzK93vm4aEpPD/zsMLAq3zXBxYppX8D5kHFD69y2opF0ZKQqeCV3OEo0m7VfUJ4OCj1SVJaLvyFVQxuleI/RykmiSkuFv7CjiEhBokhLhb+wvKe8EHxLVAXq/jhfwEY9aeDT1v81wAAAABJRU5ErkJggg==") 8/4px repeat;
+  background-color: #313031;
+  color: #ffe6c0;
 }
