@@ -414,8 +414,8 @@ class Layer extends EventTarget {
       'lines_per_file': this.#linesPerFile.value,
       'frame_count': this.#frameCount.value,
       'shift': [
-        (this.#shift.x + this.#size.x % 2) / 64,
-        (this.#shift.y + this.#size.y % 2) / 64
+        (this.#shift.x + (this.#size.x % 2) / 2) / 64,
+        (this.#shift.y + (this.#size.y % 2) / 2) / 64
       ]
     };
     if (this.drawMode == 'light') {
