@@ -35,7 +35,6 @@ function createDrawSelect() {
     ['Light', 'light'],
     ['Glow', 'glow'],
     ['Shadow', 'shadow'],
-    ['Hidden', 'hidden'],
   ]);
 }
 
@@ -52,6 +51,7 @@ function createDimensionsRow(elements) {
 }
 
 class Layer extends EventTarget {
+  #hidden;
   #imageFiles;
 
   #container;
@@ -72,6 +72,7 @@ class Layer extends EventTarget {
 
   constructor(settings) {
     super();
+    this.#hidden = false;
     this.#imageFiles = [];
 
     this.#container = document.createElement('div');
@@ -107,6 +108,13 @@ class Layer extends EventTarget {
     collapseButton.classList.add('collapse-icon');
     collapseButton.addEventListener('click', () => {
       this.#container.classList.toggle('collapsed');
+    });
+
+    let hideButton = document.createElement('div');
+    hideButton.classList.add('eye-icon');
+    hideButton.addEventListener('click', () => {
+      this.#hidden = !this.#hidden;
+      hideButton.classList.toggle('layer-hidden', this.#hidden);
     });
 
     let label = document.createElement('div');
@@ -192,7 +200,7 @@ class Layer extends EventTarget {
 
     let labelRow = document.createElement('div');
     labelRow.classList.add('box-dark', 'right-aligned');
-    labelRow.replaceChildren(closeButton, dragBlock, label, collapseButton);
+    labelRow.replaceChildren(closeButton, dragBlock, label, collapseButton, hideButton);
     labelRow.draggable = true;
 
     this.#blendMode = createBlendSelect();
@@ -296,6 +304,9 @@ class Layer extends EventTarget {
   }
 
   draw(frame, boundingBox, image, lightmap) {
+    if (this.#hidden) {
+      return;
+    }
     let data = this.getFrameData(frame);
     if (typeof (data) == 'undefined') {
       return;
@@ -367,7 +378,7 @@ class Layer extends EventTarget {
   }
 
   drawShadow(frame, boundingBox, shadowmap) {
-    if (this.drawMode != 'shadow') {
+    if (this.#hidden || this.drawMode != 'shadow') {
       return;
     }
     let data = this.getFrameData(frame);
