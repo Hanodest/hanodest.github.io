@@ -22,7 +22,7 @@ function toLuaString(obj, offset) {
       result += '  '.repeat(offset + 1);
       result += `${property} = `;
       if (property == 'shift') {
-        result += `util.by_pixel_hr(${obj.shift[0]}, ${obj.shift[1]})`;
+        result += `util.by_pixel_hr(${obj.shift[0] * 64}, ${obj.shift[1] * 64})`;
       } else if (property == 'tint') {
         let tint = obj.tint;
         result += `{ r = ${tint[0]}, g = ${tint[1]}, b = ${tint[2]}, a = ${tint[3]} }`;
