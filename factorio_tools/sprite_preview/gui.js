@@ -56,13 +56,13 @@ class Gui {
       this.#renderLoop = undefined;
     }
 
-    this.#renderer.draw(/*frame=*/0, /*light=*/255, this.#background.value, this.#context);
+    this.#renderer.draw(/*frame=*/0, /*daytime=*/0, this.#background.value, this.#context);
   }
 
   drawSprite() {
     let dayNight = parseInt(document.getElementById('day_night').value);
     let frameStart = performance.now();
-    this.#renderer.draw(this.#frame++, 255 - dayNight, this.#background.value, this.#context);
+    this.#renderer.draw(this.#frame++, dayNight / 256, this.#background.value, this.#context);
     let frameEnd = performance.now();
 
     let animationSpeed = parseInt(this.#animationSpeed.value);

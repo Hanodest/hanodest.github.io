@@ -1,4 +1,4 @@
-import { lookupColor } from './lut.js';
+import { getColorLookupTable } from './lut.js';
 import { BoundingBox } from './bounding_box.js';
 import { Vector } from './vector.js';
 import { loadImageFromUrl } from './image.js';
@@ -34,7 +34,7 @@ class Renderer {
     this.#layers = [];
   }
 
-  draw(frame, light, backgroundName, context) {
+  draw(frame, daytime, backgroundName, context) {
     let boundingBox = this.#layers.length == 0
       ? new BoundingBox(new Vector(-64, -64), new Vector(64, 64))
       : this.#layers.map((layer) => layer.boundingBox).reduce((b1, b2) => b1.union(b2));
@@ -60,7 +60,7 @@ class Renderer {
         let pos = (width * y + x) * 4;
         for (let channel = 0; channel < 3; channel++) {
           image.data[pos + channel] = tileColor;
-          lightmap.data[pos + channel] = light;
+          lightmap.data[pos + channel] = 0;
         }
         image.data[pos + 3] = 255;
         lightmap.data[pos + 3] = 255;
@@ -90,12 +90,17 @@ class Renderer {
       layer.draw(frame, new BoundingBox(topLeft, bottomRight), image, lightmap);
     });
 
+    let lightLut = getColorLookupTable(backgroundName, 0);
+    let darkLut = getColorLookupTable(backgroundName, daytime);
+
     let data = new ImageData(width, height);
     for (let x = 0; x < width; x++) {
       for (let y = 0; y < height; y++) {
         let pos = (width * y + x) * 4;
-        let lightColor = image.data.slice(pos, pos + 4);
-        let darkColor = lookupColor(lightColor);
+        let lightColor =
+          lightLut[image.data[pos] >> 4][image.data[pos + 1] >> 4][image.data[pos + 2] >> 4];
+        let darkColor =
+          darkLut[image.data[pos] >> 4][image.data[pos + 1] >> 4][image.data[pos + 2] >> 4];
         for (let channel = 0; channel < 4; channel++) {
           data.data[pos + channel] =
             Math.floor(
