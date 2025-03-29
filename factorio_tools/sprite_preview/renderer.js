@@ -1,7 +1,7 @@
 import { lookupColor } from './lut.js';
 import { BoundingBox } from './bounding_box.js';
 import { Vector } from './vector.js';
-import { loadImage } from './image.js';
+import { loadImageFromUrl } from './image.js';
 
 class Renderer {
   #layers;
@@ -11,7 +11,7 @@ class Renderer {
     this.#layers = [];
     this.#backgrounds = {};
     ['nauvis', 'vulcanus', 'fulgora', 'gleba', 'aquilo'].forEach((background) => {
-      loadImage('./backgrounds/' + background + '.jpg').then((image) => {
+      loadImageFromUrl('./backgrounds/' + background + '.jpg').then((image) => {
         this.#backgrounds[background] = image;
       });
     });

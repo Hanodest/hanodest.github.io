@@ -1,5 +1,5 @@
 import { detectLayerSettings } from './layer_settings.js';
-import { loadImage } from './image.js';
+import { loadImageFromFile } from './image.js';
 import { ImageFile } from './imageFile.js';
 import { Layer } from './layer.js';
 import { Renderer } from './renderer.js';
@@ -103,8 +103,7 @@ class Gui {
     }
   }
 
-  async loadImage(imageName, imageUrl) {
-    let image = await loadImage(imageUrl);
+  async loadImage(imageName, image) {
     let canvas = new OffscreenCanvas(image.width, image.height);
     let context = canvas.getContext('2d', { willReadFrequently: true });
     context.drawImage(image, 0, 0);
@@ -124,27 +123,20 @@ class Gui {
     }
   }
 
-  loadFromFile(file) {
-    if (typeof (file) == 'undefined') {
-      return;
-    }
+  async loadFromFile(file) {
     for (let layer of this.#renderer.layers) {
       if (layer.tryResolveImage(file)) {
         return;
       }
     }
-    let file_reader = new FileReader();
-    file_reader.addEventListener('load', () => {
-      this.loadImage(file.name, file_reader.result);
-    });
-    file_reader.readAsDataURL(file);
+    this.loadImage(file.name, await loadImageFromFile(file));
   }
 
   setupHandlers() {
     let fileInput = document.getElementById('file');
-    fileInput.addEventListener('change', () => {
+    fileInput.addEventListener('change', async () => {
       for (let file of fileInput.files) {
-        this.loadFromFile(file);
+        await this.loadFromFile(file);
       }
       fileInput.value = '';
     });

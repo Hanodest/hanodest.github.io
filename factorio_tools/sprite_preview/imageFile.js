@@ -1,4 +1,4 @@
-import { loadImage } from './image.js';
+import { loadImageFromFile } from './image.js';
 import { Vector } from './vector.js';
 
 class ImageFile extends EventTarget {
@@ -47,19 +47,15 @@ class ImageFile extends EventTarget {
     if (typeof (file) == 'undefined') {
       return;
     }
-    let file_reader = new FileReader();
-    file_reader.addEventListener('load', () => {
-      loadImage(file_reader.result).then((image) => {
-        this.#filename = file.name;
-        this.#title.innerText = file.name;
-        let canvas = new OffscreenCanvas(image.width, image.height);
-        this.#context = canvas.getContext('2d', { willReadFrequently: true });
-        this.#container.classList.remove('missing-file');
-        this.#context.drawImage(image, 0, 0);
-        this.dispatchEvent(new CustomEvent('loaded'));
-      });
+    loadImageFromFile(file).then((image) => {
+      this.#filename = file.name;
+      this.#title.innerText = file.name;
+      let canvas = new OffscreenCanvas(image.width, image.height);
+      this.#context = canvas.getContext('2d', { willReadFrequently: true });
+      this.#container.classList.remove('missing-file');
+      this.#context.drawImage(image, 0, 0);
+      this.dispatchEvent(new CustomEvent('loaded'));
     });
-    file_reader.readAsDataURL(file);
   }
 
   static fromResolvedContext(filename, context) {

@@ -1,4 +1,4 @@
-async function loadImage(imageUrl) {
+async function loadImageFromUrl(imageUrl) {
   let image = new Image()
   image.src = imageUrl
   return new Promise((resolve) => {
@@ -6,6 +6,17 @@ async function loadImage(imageUrl) {
       resolve(image);
     });
   });
+}
+
+async function loadImageFromFile(file) {
+  let file_reader = new FileReader();
+  let file_contents = new Promise((resolve) => {
+    file_reader.addEventListener('load', () => {
+      resolve(file_reader.result);
+    });
+  });
+  file_reader.readAsDataURL(file);
+  return loadImageFromUrl(await file_contents);
 }
 
 function detectSpriteSize(data) {
@@ -28,8 +39,8 @@ function detectSpriteSize(data) {
         }
       }
     }
-    if (diff/total < bestResult + 1) {
-      bestResult = diff/total;
+    if (diff / total < bestResult + 1) {
+      bestResult = diff / total;
       bestColumns = numColumns;
     }
   }
@@ -52,8 +63,8 @@ function detectSpriteSize(data) {
         }
       }
     }
-    if (diff/total < bestResult + 1) {
-      bestResult = diff/total;
+    if (diff / total < bestResult + 1) {
+      bestResult = diff / total;
       bestRows = numRows;
     }
   }
@@ -61,6 +72,6 @@ function detectSpriteSize(data) {
   return [bestRows, bestColumns];
 }
 
-export { loadImage, detectSpriteSize };
+export { loadImageFromUrl, loadImageFromFile, detectSpriteSize };
 
 
