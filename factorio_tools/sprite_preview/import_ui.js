@@ -10,6 +10,10 @@ class ImportUi extends EventTarget {
 
   constructor() {
     super();
+
+    let header = document.getElementById('import_header');
+    header.classList.remove('hidden');
+
     this.#text = document.createElement('textarea');
     this.#text.addEventListener('focus', () => {
       this.#toggleError(false);
@@ -29,7 +33,7 @@ class ImportUi extends EventTarget {
 
     this.#container = document.createElement('div');
     this.#container.classList.add('import-ui');
-    this.#container.replaceChildren(this.#text, this.#footer);
+    this.#container.replaceChildren(header, this.#text, this.#footer);
 
     this.#overlay = new Overlay(this);
   }
