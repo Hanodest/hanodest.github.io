@@ -27,7 +27,7 @@ function parseSingleLayerSettings(input) {
     result.title = basename(input.filename);
     result.filenames = [result.title];
   } else if (input.filename !== undefined) {
-    return undefined;
+    throw '`filename` is not a string.';
   }
   if (Array.isArray(input.filenames)) {
     result.filenames = input.filenames.map(basename);
@@ -36,14 +36,14 @@ function parseSingleLayerSettings(input) {
     }
   }
   if (result.filenames === undefined) {
-    return undefined;
+    throw 'At least one of the fields `filename` and `filenames` must be present.';
   }
   if (Array.isArray(input.size)) {
     result.size = new Vector(input.size[0], input.size[1]);
   } else if (typeof (input.width) == 'number' && typeof (input.height) == 'number') {
     result.size = new Vector(input.width, input.height);
   } else {
-    return undefined;
+    throw 'Either `size` or `width` and `height` fields must be present.';
   }
   let scale = input.scale !== undefined ? input.scale : 1;
   if (Array.isArray(input.shift)) {
@@ -80,19 +80,12 @@ function parseSingleLayerSettings(input) {
 }
 
 function parseLayerSettings(settingsText) {
-  let parsedText;
-  try {
-    parsedText = JSON.parse(settingsText);
-  } catch (e) {
-    return undefined;
-  }
+  let parsedText = JSON.parse(settingsText);
   if (Array.isArray(parsedText.layers)) {
     return parsedText.layers
-      .map(parseSingleLayerSettings)
-      .filter((s) => s !== undefined);
+      .map(parseSingleLayerSettings);
   } else {
-    let result = parseSingleLayerSettings(parsedText);
-    return result === undefined ? undefined : [result];
+    return [parseSingleLayerSettings(parsedText)];
   }
 }
 

@@ -16,7 +16,7 @@ class ImportUi extends EventTarget {
 
     this.#text = document.createElement('textarea');
     this.#text.addEventListener('focus', () => {
-      this.#toggleError(false);
+      this.#toggleError();
     });
 
     this.#footer = document.createElement('div');
@@ -41,11 +41,16 @@ class ImportUi extends EventTarget {
   show() {
     this.#text.value = '';
     this.#overlay.toggle(true);
-    this.#toggleError(false);
+    this.#toggleError();
   }
 
-  #toggleError(state) {
-    this.#errorMessage.classList.toggle('hidden', !state);
+  #toggleError(message) {
+    if (message === undefined) {
+      this.#errorMessage.classList.add('hidden');
+    } else {
+      this.#errorMessage.innerText = message;
+      this.#errorMessage.classList.remove('hidden');
+    }
   }
 
   #tryImport() {
@@ -58,8 +63,15 @@ class ImportUi extends EventTarget {
         }));
         return;
       }
-    } catch (e) { }
-    this.#toggleError(true);
+    } catch (e) {
+      if (typeof (e) == 'string') {
+        this.#toggleError(e);
+      } else if (e instanceof SyntaxError) {
+        this.#toggleError(e.message);
+      } else {
+        this.#toggleError('Malformed input');
+      }
+    }
   }
 
   get container() {
