@@ -80,6 +80,11 @@ function parseSingleLayerSettings(input) {
     let g = clamp(Math.floor(input.tint[1] * 255), 0, 255);
     let b = clamp(Math.floor(input.tint[2] * 255), 0, 255);
     result.tint = '#' + toHex(r, 2) + toHex(g, 2) + toHex(b, 2);
+  } else if (input.tint !== undefined) {
+    let r = clamp(Math.floor(input.tint.r * 255), 0, 255);
+    let g = clamp(Math.floor(input.tint.g * 255), 0, 255);
+    let b = clamp(Math.floor(input.tint.b * 255), 0, 255);
+    result.tint = '#' + toHex(r, 2) + toHex(g, 2) + toHex(b, 2);
   } else {
     result.tint = '#ffffff';
   }
