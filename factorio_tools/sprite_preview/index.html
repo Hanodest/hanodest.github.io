@@ -59,15 +59,32 @@
         </div>
       </div>
     </div>
-    <div id="import_header" class="import-header hidden">
-      Accepted input: well-formed JSON of
-      <a href="https://lua-api.factorio.com/latest/prototypes/AnimationPrototype.html">
-        AnimationPrototype
-      </a>.
-      It can be obtained from the export function of this tool,
-      from a dump produced by running
-      <a href="https://wiki.factorio.com/Command_line_parameters">factorio --dump-data</a>,
-      or any other methods.
+    <div style="display:none">
+      <div id="import_header" class="import-header">
+        Accepted input: well-formed JSON of
+        <a href="https://lua-api.factorio.com/latest/prototypes/AnimationPrototype.html">
+          AnimationPrototype
+        </a>.
+        It can be obtained from the export function of this tool,
+        from a dump produced by running
+        <a href="https://wiki.factorio.com/Command_line_parameters">factorio --dump-data</a>,
+        or any other methods.
+      </div>
+      <div id="settings_header" class="settings-header">
+        The table below allows configuring default parameters used for added spritesheets
+        based on their name. The first preset that has <i>filename</i> column matching
+        the name of the added spritesheet will be applied. <i>Filename</i> can be any valid
+        <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Regular_expressions">RegExp</a>.
+        Empty <i>filename</i> column would match all files.
+        <br>
+        <i>Sheet number</i> is a RegExp, that, if not empty, will remove the matching
+        part of the file name, and all the uploaded spritesheets that have the same remaning
+        part will be grouped together.
+        <br>
+        The other columns have default parameters used for the added spritesheet.
+        If any of the dimensions is left empty, it will be automatically detected instead.
+      </div>
     </div>
+    <div id="user_settings" class="user-settings-icon"></div>
   </body>
 </html>

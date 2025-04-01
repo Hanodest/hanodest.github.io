@@ -93,6 +93,16 @@ body {
   margin: 0px 4px 0px 4px;
 }
 
+.user-settings-icon {
+  background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAQAAADZc7J/AAAAAXNSR0IB2cksfwAAAARnQU1BAACxjwv8YQUAAAAgY0hSTQAAeiYAAICEAAD6AAAAgOgAAHUwAADqYAAAOpgAABdwnLpRPAAAAAlwSFlzAAAAegAAAHoBlQypfwAAAAd0SU1FB+kDHxc5IenB9eIAAAIJSURBVHjandIDkCVJEADQPNu2bdu2bdu2bds2Q2fbtte29y0qI/riz/ToNbOsSMmsXvWTt80ZHeM4xVnRHqb0iDes5XSdFN2dZ0Nve8Dk0TqvqfdytMaERqs3NFrncvUuiNa5kPSXQ6xtf7+QromWmc5m/lP8brpMndoPit72M1vU85nKPlW67VS+iXoqLFOlW7i5hTStKSMlg1V2rtJtqtIl027CvxaI/7OJRwxUfG7iTJ3Qu4pBrrVCHvMB4CnruNAj5o0UbpB8YCOzWNebkrsiXK2f57J65dNIYT/1DrCcVNOACfVRr7vZ9JAMN1jyQqTQSb3fI7ygeMyCprJzNsg1ligNLK6LYc5yryGKoR52sZH+tYidc5E7mzDGc5Lk1yhMaprx3ysUx46PZjKpoyW3RTKHpH+kZF1D0NsykVxM+iySfRQ/2jMamcX8ZrCCj5wyPl7IN4YoDjRhhCV9rlgtmrK6TS2fRba1sJUj7Evq5lWjSCtFIwsZqdGe1tC8u5prYLhGRzpVo6EYbftoZH6jwGO2dp1BOYJ5fWe0qz2ruM+MNrRqNLKxTuDNjC8D3e1tYlOMT/kFo6wRzfOq4qSM11J0jmQep9g06ljPb+CjjK8H/R0XbWUOI8FbDvaY4WD7aDura2rLaDvLG2W0UVI1gjazjOUspBM6Wdk6toiOsKNv7BJtMAYDo8+jrOgahAAAAABJRU5ErkJggg==");
+  background-size: 100%;
+  width: 32px;
+  height: 32px;
+  position: fixed;
+  top: 8px;
+  right: 8px;
+}
+
 .eye-icon {
   background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAQAAABKfvVzAAAAAXNSR0IB2cksfwAAAARnQU1BAACxjwv8YQUAAAAgY0hSTQAAeiYAAICEAAD6AAAAgOgAAHUwAADqYAAAOpgAABdwnLpRPAAAAAlwSFlzAAAuIwAALiMBeKU/dgAAAAd0SU1FB+kDHQAxCafNqm4AAADxSURBVHja1FI1QsVAFIxbhXW4S4ctpwhVtE6Pux59GGwNvnZ/XWaeOxPQ4CLELJbYZ3ly+4M9LCLHBZ7xwv7M0ylW4PWCz6Ek6N3qL3yd+8+QPVz9QN5wi479lqfvlyv+uqYpJ1L2DY6RIWTPIHj7fn0iwlPSDzT4AmJSSvYjnhYk5Zko95uwhUdpzDFBLffvW8ubkIY9YotwTONcOniLjBQCpIAjvtzK+zmmHZRaRDqEqIwYlXzptHs1BsE26ai/SbbTwnC6sZze/C+siwQdybAu2mFViXuSFPFv4gS8EUtj7OLrX975x0DJm7QMNPgBAH4BuJVz18n4AAAAAElFTkSuQmCC");
   width: 24px;
@@ -173,7 +183,15 @@ input[type="number"] {
   text-align: center;
   outline: none;
 }
-input[type="number"]:focus {
+input[type="text"] {
+  margin: 4px 4px;
+  background-color: #8e8e8e;
+  width: 150px;
+  text-align: left;
+  outline: none;
+}
+input[type="number"]:focus,
+input[type="text"]:focus {
   background-color: #f1be64;
 }
 input[type="number"]::-webkit-outer-spin-button,
@@ -220,6 +238,14 @@ input[type="number"] {
   background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAIGNIUk0AAHomAACAhAAA+gAAAIDoAAB1MAAA6mAAADqYAAAXcJy6UTwAAAAJcEhZcwAACxMAAAsTAQCanBgAAAAHdElNRQfpAx0AICy/EF05AAAANElEQVR42mMYxmDl6rUTgZibEgM2wQwh2wCKDAFppsgQhGaEIRQbQF8voGumfzTCNQ9/AAAuqWARkMs+BQAAACV0RVh0ZGF0ZTpjcmVhdGUAMjAyNS0wMy0yOVQwMDozMjowOCswMDowMEP8cdkAAAAldEVYdGRhdGU6bW9kaWZ5ADIwMjUtMDMtMjlUMDA6MzI6MDgrMDA6MDAyocllAAAAKHRFWHRkYXRlOnRpbWVzdGFtcAAyMDI1LTAzLTI5VDAwOjMyOjQ0KzAwOjAwJl6MNAAAAABJRU5ErkJggg==");
 }
 
+#layers_settings {
+  display: flex;
+  flex-direction: column;
+}
+#layers_settings.inverted-order {
+  flex-direction: column-reverse;
+}
+
 .range-line {
   padding: 4px 0;
   display: flex;
@@ -244,6 +270,10 @@ input[type="number"] {
 .flex-vertical {
   display: flex;
   flex-direction: column;
+}
+
+.white {
+  color: #ffffff;
 }
 
 input[type='range'] {
@@ -347,4 +377,25 @@ textarea:focus {
   border-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABEAAAARCAYAAAA7bUf6AAAAAXNSR0IB2cksfwAAAARnQU1BAACxjwv8YQUAAAAgY0hSTQAAeiYAAICEAAD6AAAAgOgAAHUwAADqYAAAOpgAABdwnLpRPAAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB+kDHQACLBiiGxkAAAE9SURBVHjarZNBTsMwEEWn3sIlWHGAsuwtkFrVosk5egDW3IHrwE26qNrg2LHtBL+Fo5AFitRa+prOzH9fcpoomZ26qo+Ht8O31rrZ7Xb9drsdqPTM2c8ZNcJ1vdF7/dU0zbsxZu2ce/Ter0IIQqVnzh4f/j8hVVVt2rb9vFwuLwBZ4qxDYls7/mbOHh9+uBKC8eN8Pj/5kOHOiTFGmp9GrtfrKHrm7PHhh4NXeq+Pp9NpHXyQrusIxCytacVaO4qeOXt8+OHgVV68ZhNXEN95ocYYpe97GYZBOFR65lMfHLzK93vm4aEpPD/zsMLAq3zXBxYppX8D5kHFD69y2opF0ZKQqeCV3OEo0m7VfUJ4OCj1SVJaLvyFVQxuleI/RykmiSkuFv7CjiEhBokhLhb+wvKe8EHxLVAXq/jhfwEY9aeDT1v81wAAAABJRU5ErkJggg==") 8/4px repeat;
   background-color: #313031;
   color: #ffe6c0;
+}
+
+.settings-header {
+  color: #ffffff;
+  max-width: 730px;
+  font-size: 12px;
+  margin: auto;
+}
+.settings-header a {
+  color: #ffffff;
+}
+.image-rule,
+.image-rule-header {
+  display: table-row;
+}
+.image-rule-cell,
+.image-rule-header-cell {
+  display: table-cell
+}
+.image-rule-header-cell {
+  color: #ffffff;
 }

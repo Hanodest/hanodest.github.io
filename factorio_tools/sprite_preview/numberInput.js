@@ -9,7 +9,7 @@ class NumberInput extends EventTarget {
   #container;
   #textInput;
 
-  constructor(name, minValue, maxValue, defaultValue) {
+  constructor(name, minValue, maxValue, defaultValue, allowEmpty) {
     super();
 
     this.#minValue = minValue;

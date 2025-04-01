@@ -52,6 +52,7 @@ function createDimensionsRow(elements) {
 
 class Layer extends EventTarget {
   #hidden;
+  #layerName;
   #imageFiles;
 
   #container;
@@ -117,8 +118,9 @@ class Layer extends EventTarget {
       hideButton.classList.toggle('layer-hidden', this.#hidden);
     });
 
+    this.#layerName = settings.filename;
     let label = document.createElement('div');
-    label.innerText = settings.title;
+    label.innerText = this.#layerName;
     label.classList.add('label-text');
 
     let dragBlock = document.createElement('div');
@@ -406,6 +408,7 @@ class Layer extends EventTarget {
     let result = {
       'priority': 'high',
       'scale': 0.5,
+      'filename': this.#layerName,
       'filenames': this.#imageFiles.map((f) => f.filename),
       'blend_mode': this.blendMode,
       'width': this.#size.x,
@@ -438,6 +441,10 @@ class Layer extends EventTarget {
     return new Vector(this.#shiftX.value, this.#shiftY.value);
   }
 
+  get name() {
+    return this.#layerName;
+  }
+
   get blendMode() {
     return this.#blendMode.value;
   }
@@ -466,4 +473,4 @@ class Layer extends EventTarget {
   }
 }
 
-export { Layer };
+export { Layer, createBlendSelect, createDrawSelect };

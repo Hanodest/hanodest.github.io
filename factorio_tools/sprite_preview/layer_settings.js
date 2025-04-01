@@ -2,21 +2,29 @@ import { detectSpriteSize } from './image.js';
 import { basename, clamp, toHex } from './util.js';
 import { Vector } from './vector.js';
 
-function detectLayerSettings(imageName, context) {
+function detectLayerSettings(imageName, imageRule, context) {
   let canvas = context.canvas;
   let [numRows, numColumns] = detectSpriteSize(
     context.getImageData(0, 0, canvas.width, canvas.height));
+  let serializedRule = imageRule.serialized;
+  if (serializedRule.columns !== undefined) {
+    numColumns = serializedRule.columns;
+  }
+  if (serializedRule.rows !== undefined) {
+    numRows = serializedRule.rows;
+  }
+  let layerName = imageRule.getLayerName(imageName);
 
   return {
-    title: imageName,
+    filename: layerName || imageName,
     filenames: [],
     size: new Vector(canvas.width / numColumns, canvas.height / numRows),
     shift: new Vector(0, 0),
     frameCount: 0,
     lineLength: numColumns,
     linesPerFile: numRows,
-    blendMode: 'normal',
-    drawMode: 'sprite',
+    blendMode: serializedRule.blendMode || 'normal',
+    drawMode: serializedRule.drawMode || 'sprite',
     tint: '#ffffff',
   };
 }
@@ -24,15 +32,15 @@ function detectLayerSettings(imageName, context) {
 function parseSingleLayerSettings(input) {
   let result = {};
   if (typeof (input.filename) == 'string') {
-    result.title = basename(input.filename);
-    result.filenames = [result.title];
+    result.filename = basename(input.filename);
+    result.filenames = [result.filename];
   } else if (input.filename !== undefined) {
     throw '`filename` is not a string.';
   }
   if (Array.isArray(input.filenames)) {
     result.filenames = input.filenames.map(basename);
-    if (result.title === undefined) {
-      result.title = input.filenames[0];
+    if (result.filename === undefined) {
+      result.filename = input.filenames[0];
     }
   }
   if (result.filenames === undefined) {

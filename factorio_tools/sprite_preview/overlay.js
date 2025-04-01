@@ -9,6 +9,7 @@ class Overlay extends EventTarget {
     let closeButton = document.createElement('div');
     closeButton.classList.add('close-icon');
     closeButton.addEventListener(('click'), () => {
+      this.dispatchEvent(new CustomEvent('close'));
       this.toggle(false);
     });
     header.appendChild(closeButton);
@@ -24,6 +25,7 @@ class Overlay extends EventTarget {
     this.#container.classList.add('hidden', 'overlay');
     this.#container.appendChild(overlayWindow);
     this.#container.addEventListener(('click'), () => {
+      this.dispatchEvent(new CustomEvent('close'));
       this.toggle(false);
     });
     document.body.appendChild(this.#container);

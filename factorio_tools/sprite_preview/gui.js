@@ -1,3 +1,4 @@
+import { basename } from './util.js';
 import { detectLayerSettings } from './layer_settings.js';
 import { loadImageFromFile } from './image.js';
 import { ImageFile } from './imageFile.js';
@@ -5,6 +6,7 @@ import { Layer } from './layer.js';
 import { Renderer } from './renderer.js';
 import { ExportUi } from './export_ui.js';
 import { ImportUi } from './import_ui.js';
+import { UserSettings } from './user_settings.js';
 
 class Gui {
   #renderer;
@@ -20,6 +22,7 @@ class Gui {
 
   #exportUi;
   #importUi;
+  #userSettings;
 
   constructor() {
     this.#renderer = new Renderer();
@@ -40,6 +43,11 @@ class Gui {
     this.#importUi.addEventListener('settingsImported', (event) => {
       this.importSettings(event.detail);
     });
+    this.#userSettings = new UserSettings();
+    this.#userSettings.addEventListener('settingsUpdated', () => {
+      this.#layersSettings.classList.toggle('inverted-order', this.#userSettings.invertLayerOrder);
+    });
+    this.#layersSettings.classList.toggle('inverted-order', this.#userSettings.invertLayerOrder);
 
     this.setupHandlers();
     this.reset();
@@ -106,12 +114,12 @@ class Gui {
     }
   }
 
-  async loadImage(imageName, image) {
+  loadImage(imageName, imageRule, image) {
     let canvas = new OffscreenCanvas(image.width, image.height);
     let context = canvas.getContext('2d', { willReadFrequently: true });
     context.drawImage(image, 0, 0);
 
-    let layerSettings = detectLayerSettings(imageName, context);
+    let layerSettings = detectLayerSettings(imageName, imageRule, context);
     let layer = this.addLayer(layerSettings);
     layer.addImage(ImageFile.fromResolvedContext(imageName, context));
   }
@@ -132,7 +140,16 @@ class Gui {
         return;
       }
     }
-    this.loadImage(file.name, await loadImageFromFile(file));
+    let filename = basename(file.name);
+    let imageRule = this.#userSettings.getImageRule(filename);
+    let layerName = imageRule.getLayerName(filename);
+    for (let layer of this.#renderer.layers) {
+      if (layer.name === layerName) {
+        layer.addImage(ImageFile.fromFile(file));
+        return;
+      }
+    }
+    this.loadImage(filename, imageRule, await loadImageFromFile(file));
   }
 
   setupHandlers() {
@@ -151,6 +168,9 @@ class Gui {
     });
     document.getElementById('import_settings').addEventListener('click', () => {
       this.#importUi.show();
+    });
+    document.getElementById('user_settings').addEventListener('click', () => {
+      this.#userSettings.show();
     });
   }
 
