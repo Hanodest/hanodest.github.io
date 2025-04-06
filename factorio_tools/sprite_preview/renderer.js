@@ -2,17 +2,21 @@ import { getColorLookupTable } from './lut.js';
 import { BoundingBox } from './bounding_box.js';
 import { Vector } from './vector.js';
 import { loadImageFromUrl } from './image.js';
+import createRenderer from './wasm/renderer.js';
 
 class Renderer {
   #layers;
   #backgrounds;
+  #wasmRenderer;
 
-  constructor() {
+  constructor(wasmRenderer) {
+    this.#wasmRenderer = wasmRenderer;
     this.#layers = [];
     this.#backgrounds = {};
     ['nauvis', 'vulcanus', 'fulgora', 'gleba', 'aquilo'].forEach((background) => {
       loadImageFromUrl('./backgrounds/' + background + '.jpg').then((image) => {
         this.#backgrounds[background] = image;
+        this.addImage(background, image);
       });
     });
   }
@@ -34,12 +38,27 @@ class Renderer {
     this.#layers = [];
   }
 
+  addImage(id, image) {
+    let canvas = new OffscreenCanvas(image.width, image.height);
+    let context = canvas.getContext('2d');
+    context.drawImage(image, 0, 0);
+    let imageMemory = this.#wasmRenderer.ccall(
+      'CreateImage', 'number', ['string', 'number', 'number'], [id, image.width, image.height]);
+    this.#wasmRenderer.HEAPU8.set(context.getImageData(0, 0, image.width, image.height).data,
+      imageMemory);
+  }
+
   draw(frame, daytime, backgroundName, context) {
     let boundingBox = this.#layers.length == 0
       ? new BoundingBox(new Vector(-64, -64), new Vector(64, 64))
       : this.#layers.map((layer) => layer.boundingBox).reduce((b1, b2) => b1.union(b2));
     let topLeft = boundingBox.topLeft.subtract(new Vector(64, 64));
     let bottomRight = boundingBox.bottomRight.add(new Vector(64, 64));
+    if (this.#wasmRenderer !== undefined) {
+      this.#wasmRenderer.ccall('InitCanvas', 'undefined', ['number', 'number', 'number', 'number'],
+        [topLeft.x, topLeft.y, bottomRight.x, bottomRight.y]);
+    }
+    this.#wasmRenderer.ccall('SetBackground', 'undefined', ['string'], [backgroundName]);
 
     let width = bottomRight.x - topLeft.x;
     let height = bottomRight.y - topLeft.y;
@@ -47,69 +66,54 @@ class Renderer {
     canvas.width = width;
     canvas.height = height;
 
-    let image = new ImageData(width, height);
-    let lightmap = new ImageData(width, height);
-    let shadowmap = new ImageData(width, height);
-
-    for (let x = 0; x < width; x++) {
-      for (let y = 0; y < height; y++) {
-        let tileColor = (
-          Math.floor((x + topLeft.x) / 64)
-          + Math.floor((y + topLeft.y) / 64)
-        ) % 2 == 0 ? 48 : 27;
-        let pos = (width * y + x) * 4;
-        for (let channel = 0; channel < 3; channel++) {
-          image.data[pos + channel] = tileColor;
-          lightmap.data[pos + channel] = 0;
-        }
-        image.data[pos + 3] = 255;
-        lightmap.data[pos + 3] = 255;
-      }
-    }
-
-    let background = this.#backgrounds[backgroundName];
-    if (this.#layers.length != 0 && typeof (background) != 'undefined') {
-      context.drawImage(background,
-        (background.width - width) >> 1, (background.height - height) >> 1,
-        width, height, 0, 0, width, height);
-      image = context.getImageData(0, 0, width, height);
-    }
-
     this.#layers.forEach((layer) => {
-      layer.drawShadow(frame, new BoundingBox(topLeft, bottomRight), shadowmap);
-    });
-    for (let pos = 0; pos < width * height; pos++) {
-      if (shadowmap.data[pos * 4 + 3] > 0) {
-        for (let channel = 0; channel < 3; channel++) {
-          image.data[pos * 4 + channel] >>= 1;
-        }
+      if (layer.drawMode != 'shadow') {
+        return;
       }
-    }
-
-    this.#layers.forEach((layer) => {
-      layer.draw(frame, new BoundingBox(topLeft, bottomRight), image, lightmap);
+      let sprite = layer.getSprite(frame);
+      if (sprite === undefined) { return; }
+      this.#wasmRenderer.ccall('DrawShadow', 'undefined',
+        ['string', 'number', 'number', 'number', 'number', 'number', 'number'],
+        [sprite.imageId, sprite.shift.x, sprite.shift.y, sprite.size.x, sprite.size.y,
+        layer.boundingBox.topLeft.x, layer.boundingBox.topLeft.y]);
     });
 
-    let lightLut = getColorLookupTable(backgroundName, 0);
-    let darkLut = getColorLookupTable(backgroundName, daytime);
+    this.#wasmRenderer.ccall('ApplyShadows', 'undefined', [], []);
+
+    this.#layers.forEach((layer) => {
+      let sprite = layer.getSprite(frame);
+      if (sprite === undefined) { return; }
+      if (layer.drawMode == 'sprite' || layer.drawMode == 'glow') {
+        this.#wasmRenderer.ccall('DrawSprite', 'undefined',
+          ['string', 'string', 'number', 'number', 'number', 'number', 'number', 'number',
+            'number', 'number', 'number', 'number'],
+          [sprite.imageId, layer.blendMode,
+          sprite.shift.x, sprite.shift.y, sprite.size.x, sprite.size.y,
+          layer.boundingBox.topLeft.x, layer.boundingBox.topLeft.y,
+          layer.tint[0], layer.tint[1], layer.tint[2], layer.tint[3]]);
+      }
+      if (layer.drawMode == 'light' || layer.drawMode == 'glow') {
+        this.#wasmRenderer.ccall('DrawLight', 'undefined',
+          ['string', 'number', 'number', 'number', 'number', 'number', 'number',
+            'number', 'number', 'number', 'number'],
+          [sprite.imageId,
+          sprite.shift.x, sprite.shift.y, sprite.size.x, sprite.size.y,
+          layer.boundingBox.topLeft.x, layer.boundingBox.topLeft.y,
+          layer.tint[0], layer.tint[1], layer.tint[2], layer.tint[3]]);
+      }
+    });
+
+    this.#wasmRenderer.HEAPU8.set(
+      getColorLookupTable(backgroundName, 0),
+      this.#wasmRenderer.ccall('GetDayLut', 'number', [], []))
+    this.#wasmRenderer.HEAPU8.set(
+      getColorLookupTable(backgroundName, daytime),
+      this.#wasmRenderer.ccall('GetNightLut', 'number', [], []))
 
     let data = new ImageData(width, height);
-    for (let x = 0; x < width; x++) {
-      for (let y = 0; y < height; y++) {
-        let pos = (width * y + x) * 4;
-        let lightColor =
-          lightLut[image.data[pos] >> 4][image.data[pos + 1] >> 4][image.data[pos + 2] >> 4];
-        let darkColor =
-          darkLut[image.data[pos] >> 4][image.data[pos + 1] >> 4][image.data[pos + 2] >> 4];
-        for (let channel = 0; channel < 4; channel++) {
-          data.data[pos + channel] =
-            Math.floor(
-              (lightColor[channel] * lightmap.data[pos + channel] +
-                darkColor[channel] * (255 - lightmap.data[pos + channel]))
-              / 255);
-        }
-      }
-    }
+    let renderResult = this.#wasmRenderer.ccall('ApplyLight', 'number', [], []);
+    data.data.set(this.#wasmRenderer.HEAPU8.slice(
+      renderResult, renderResult + width * height * 4));
     context.putImageData(data, 0, 0);
   }
 
@@ -123,6 +127,11 @@ class Renderer {
 
   get layers() {
     return this.#layers;
+  }
+
+  static async create() {
+    let wasmRenderer = await createRenderer();
+    return new Renderer(wasmRenderer);
   }
 };
 

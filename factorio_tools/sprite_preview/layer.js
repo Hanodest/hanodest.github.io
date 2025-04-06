@@ -3,10 +3,6 @@ import { ImageFile } from './imageFile.js';
 import { NumberInput } from './numberInput.js';
 import { Vector } from './vector.js';
 
-function toUint8(x) {
-  return Math.max(0, Math.min(255, Math.round(x)));
-}
-
 function createSelect(options) {
   let select = document.createElement('select');
   options.forEach((params) => {
@@ -54,6 +50,7 @@ class Layer extends EventTarget {
   #hidden;
   #layerName;
   #imageFiles;
+  #renderer;
 
   #container;
   #fileList;
@@ -71,10 +68,11 @@ class Layer extends EventTarget {
   #linesPerFile;
   #frameCount;
 
-  constructor(settings) {
+  constructor(settings, renderer) {
     super();
     this.#hidden = false;
     this.#imageFiles = [];
+    this.#renderer = renderer;
 
     this.#container = document.createElement('div');
     this.#container.classList.add('layer');
@@ -150,7 +148,7 @@ class Layer extends EventTarget {
     addSpritesheetsInput.multiple = true;
     addSpritesheetsInput.addEventListener('change', () => {
       for (let file of addSpritesheetsInput.files) {
-        this.addImage(ImageFile.fromFile(file));
+        this.addImage(ImageFile.fromFile(this.#renderer, file));
       }
       addSpritesheetsInput.value = '';
     });
@@ -224,7 +222,7 @@ class Layer extends EventTarget {
     this.#container.replaceChildren(labelRow, layerSettings);
 
     settings.filenames.forEach((filename) => {
-      this.addImage(new ImageFile(filename));
+      this.addImage(new ImageFile(this.#renderer, filename));
     });
   }
 
@@ -292,113 +290,23 @@ class Layer extends EventTarget {
     return this.#imageFiles[0].size;
   }
 
-  getFrameData(frame) {
+  getSprite(frame) {
+    if (this.#hidden) {
+      return undefined;
+    }
     frame = frame % this.#frameCount.value;
     let column = frame % this.#lineLength.value;
     let row = Math.floor(frame / this.#lineLength.value);
     let imageFile = this.#imageFiles[Math.trunc(row / this.#linesPerFile.value)];
-    if (typeof (imageFile) == 'undefined' || typeof (imageFile.context) == 'undefined') {
+    if (typeof (imageFile) == 'undefined' || typeof (imageFile.imageId) == 'undefined') {
       return undefined;
     }
     row = row % this.#linesPerFile.value;
-    return imageFile.context.getImageData(
-      this.#size.x * column, this.#size.y * row, this.#size.x, this.#size.y);
-  }
-
-  draw(frame, boundingBox, image, lightmap) {
-    if (this.#hidden) {
-      return;
-    }
-    let data = this.getFrameData(frame);
-    if (typeof (data) == 'undefined') {
-      return;
-    }
-    let shift = this.boundingBox.topLeft.subtract(boundingBox.topLeft);
-    let drawMode = this.drawMode;
-    if (drawMode == 'sprite' || drawMode == 'glow') {
-      this.drawAsLayer(data, shift, image);
-    }
-
-    if (drawMode == 'light' || drawMode == 'glow') {
-      this.drawAsLight(data, shift, lightmap);
-    }
-  }
-
-  drawAsLayer(data, shift, image) {
-    let width = data.width;
-    let height = data.height;
-    let tint = this.tint;
-    let blendMode = this.blendMode;
-    for (let x = 0; x < width; x++) {
-      for (let y = 0; y < height; y++) {
-        let pos = (width * y + x) * 4;
-        let dstPos = (image.width * (y + shift.y) + (x + shift.x)) * 4;
-        let srcAlpha = data.data[pos + 3] / 255;
-        for (let channel = 0; channel < 3; channel++) {
-          let src = data.data[pos + channel] * tint[channel] / 255;
-          let dst = image.data[dstPos + channel];
-          switch (blendMode) {
-            case 'normal':
-              image.data[dstPos + channel] = toUint8(src * srcAlpha + dst * (1 - srcAlpha));
-              break;
-            case 'additive':
-              image.data[dstPos + channel] = toUint8(src * srcAlpha + dst);
-              break;
-            case 'additive-soft':
-              image.data[dstPos + channel] = toUint8(src * srcAlpha * (1 - dst / 255) + dst);
-              break;
-            case 'multiplicative':
-              image.data[dstPos + channel] = toUint8(src * srcAlpha * dst / 255);
-              break;
-            case 'multiplicative-with-alpha':
-              image.data[dstPos + channel] = toUint8(src * srcAlpha * srcAlpha * dst / 255 +
-                dst * (1 - srcAlpha));
-              break;
-            default:
-              break;
-          }
-        }
-      }
-    }
-  }
-
-  drawAsLight(data, shift, lightmap) {
-    let width = data.width;
-    let height = data.height;
-    let tint = this.tint;
-    for (let x = 0; x < width; x++) {
-      for (let y = 0; y < height; y++) {
-        let pos = (width * y + x) * 4;
-        let dstPos = (lightmap.width * (y + shift.y) + (x + shift.x)) * 4;
-        let srcAlpha = data.data[pos + 3] / 255;
-        for (let channel = 0; channel < 3; channel++) {
-          let src = Math.floor(data.data[pos + channel] * tint[channel] * srcAlpha / 255);
-          lightmap.data[dstPos + channel] = Math.min(lightmap.data[dstPos + channel] + src, 255);
-        }
-      }
-    }
-  }
-
-  drawShadow(frame, boundingBox, shadowmap) {
-    if (this.#hidden || this.drawMode != 'shadow') {
-      return;
-    }
-    let data = this.getFrameData(frame);
-    if (typeof (data) == 'undefined') {
-      return;
-    }
-    let width = data.width;
-    let height = data.height;
-    let shift = this.boundingBox.topLeft.subtract(boundingBox.topLeft);
-    for (let x = 0; x < width; x++) {
-      for (let y = 0; y < height; y++) {
-        let pos = (width * y + x) * 4;
-        let dstPos = (shadowmap.width * (y + shift.y) + (x + shift.x)) * 4;
-        if (data.data[pos + 3] > 127) {
-          shadowmap.data[dstPos + 3] = 1;
-        }
-      }
-    }
+    return {
+      imageId: imageFile.imageId,
+      shift: new Vector(this.#size.x * column, this.#size.y * row),
+      size: new Vector(this.#size.x, this.#size.y)
+    };
   }
 
   exportSettings() {
@@ -458,7 +366,8 @@ class Layer extends EventTarget {
     return [
       parseInt(color.substring(1, 3), 16),
       parseInt(color.substring(3, 5), 16),
-      parseInt(color.substring(5, 7), 16)
+      parseInt(color.substring(5, 7), 16),
+      255
     ]
   }
 

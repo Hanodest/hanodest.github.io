@@ -2,16 +2,20 @@ import { loadImageFromFile } from './image.js';
 import { Vector } from './vector.js';
 
 class ImageFile extends EventTarget {
-  #context;
+  #renderer;
+  #imageId;
+  #imageSize;
 
   #filename;
   #title;
 
   #container;
 
-  constructor(filename) {
+  constructor(renderer, filename) {
     super();
-    this.#context = undefined;
+    this.#renderer = renderer;
+    this.#imageId = undefined;
+    this.#imageSize = undefined;
 
     this.#filename = filename;
 
@@ -50,32 +54,33 @@ class ImageFile extends EventTarget {
     loadImageFromFile(file).then((image) => {
       this.#filename = file.name;
       this.#title.innerText = file.name;
-      let canvas = new OffscreenCanvas(image.width, image.height);
-      this.#context = canvas.getContext('2d', { willReadFrequently: true });
+      if (this.#imageId === undefined) {
+        this.#imageId = crypto.randomUUID();
+      }
+      this.#imageSize = new Vector(image.width, image.height);
+      this.#renderer.addImage(this.#imageId, image);
       this.#container.classList.remove('missing-file');
-      this.#context.drawImage(image, 0, 0);
       this.dispatchEvent(new CustomEvent('loaded'));
     });
   }
 
-  static fromResolvedContext(filename, context) {
-    let result = new ImageFile(filename);
-    result.#context = context;
+  static fromResolvedContext(renderer, filename, context) {
+    let result = new ImageFile(renderer, filename);
     result.#container.classList.remove('missing-file');
+    result.#imageId = crypto.randomUUID();
+    result.#imageSize = new Vector(context.canvas.width, context.canvas.height);
+    result.#renderer.addImage(result.#imageId, context.canvas);
     return result;
   }
 
-  static fromFile(file) {
-    let result = new ImageFile(file.name);
+  static fromFile(renderer, file) {
+    let result = new ImageFile(renderer, file.name);
     result.reloadFromFile(file);
     return result;
   }
 
   get size() {
-    if (typeof (this.#context) == 'undefined') {
-      return undefined;
-    }
-    return new Vector(this.#context.canvas.width, this.#context.canvas.height);
+    return this.#imageSize;
   }
 
   get filename() {
@@ -86,8 +91,8 @@ class ImageFile extends EventTarget {
     return this.#container;
   }
 
-  get context() {
-    return this.#context;
+  get imageId() {
+    return this.#imageId;
   }
 };
 

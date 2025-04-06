@@ -12,25 +12,13 @@ async function getLutTables() {
   for (let planet in planets) {
     let image = await (loadImageFromUrl(`./luts/${planet}.png`));
     let canvas = new OffscreenCanvas(image.width, image.height);
-    let context = canvas.getContext('2d');
+    let context = canvas.getContext('2d', { willReadFrequently: true });
     context.drawImage(image, 0, 0);
-    let data = context.getImageData(0, 0, image.width, image.height).data;
     result[planet] = [];
     planets[planet].forEach((time, planetIdx) => {
-      let lut = [];
-      for (let r = 0; r < 16; r++) {
-        lut[r] = [];
-        for (let g = 0; g < 16; g++) {
-          lut[r][g] = [];
-          for (let b = 0; b < 16; b++) {
-            let idx = (planetIdx * 4096 + g * 256 + b * 16 + r) * 4;
-            lut[r][g][b] = data.slice(idx, idx + 4);
-          }
-        }
-      }
       result[planet].push({
         time: time,
-        lut: lut
+        lut: context.getImageData(0, 16 * planetIdx, 256, 16).data
       });
     });
   }
@@ -52,19 +40,9 @@ function getColorLookupTable(planet, daytime) {
     }
     let w2 = (daytime - table.time) / (nextTable.time - table.time);
     let w1 = 1 - w2;
-    let lut = [];
-    for (let r = 0; r < 16; r++) {
-      lut[r] = [];
-      for (let g = 0; g < 16; g++) {
-        lut[r][g] = [];
-        for (let b = 0; b < 16; b++) {
-          lut[r][g][b] = [];
-          for (let channel = 0; channel < 4; channel++) {
-            lut[r][g][b][channel] =
-              table.lut[r][g][b][channel] * w1 + nextTable.lut[r][g][b][channel] * w2;
-          }
-        }
-      }
+    let lut = new Uint8Array(16384);
+    for (let i = 0; i < 16384; i++) {
+      lut[i] = table.lut[i] * w1 + nextTable.lut[i] * w2;
     }
     return lut;
   }

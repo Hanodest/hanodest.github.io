@@ -24,8 +24,8 @@ class Gui {
   #importUi;
   #userSettings;
 
-  constructor() {
-    this.#renderer = new Renderer();
+  constructor(renderer) {
+    this.#renderer = renderer;
 
     this.#controls = document.getElementById('global_controls');
     this.#layersSettings = document.getElementById('layers_settings');
@@ -79,7 +79,7 @@ class Gui {
   }
 
   addLayer(layerSettings) {
-    let layer = new Layer(layerSettings);
+    let layer = new Layer(layerSettings, this.#renderer);
     layer.addEventListener('delete', () => {
       this.#renderer.removeLayer(layer);
       this.redraw();
@@ -121,7 +121,7 @@ class Gui {
 
     let layerSettings = detectLayerSettings(imageName, imageRule, context);
     let layer = this.addLayer(layerSettings);
-    layer.addImage(ImageFile.fromResolvedContext(imageName, context));
+    layer.addImage(ImageFile.fromResolvedContext(this.#renderer, imageName, context));
   }
 
   importSettings(parsedSettings) {
@@ -145,7 +145,7 @@ class Gui {
     let layerName = imageRule.getLayerName(filename);
     for (let layer of this.#renderer.layers) {
       if (layer.name === layerName) {
-        layer.addImage(ImageFile.fromFile(file));
+        layer.addImage(ImageFile.fromFile(this.#renderer, file));
         return;
       }
     }
@@ -172,6 +172,11 @@ class Gui {
     document.getElementById('user_settings').addEventListener('click', () => {
       this.#userSettings.show();
     });
+  }
+
+  static async create() {
+    let render = await Renderer.create();
+    return new Gui(render);
   }
 
 };

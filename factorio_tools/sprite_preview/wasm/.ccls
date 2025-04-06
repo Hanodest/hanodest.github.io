@@ -1,0 +1,4 @@
+clang
+%h -x c++-header
+-I/usr/lib/emscripten/system/include
+-I.

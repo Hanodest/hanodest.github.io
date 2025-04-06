@@ -7,8 +7,8 @@
     <script type="module">
       import {Gui} from './gui.js';
       let gui = undefined;
-      window.addEventListener('load', () => {
-        gui = new Gui();
+      window.addEventListener('load', async () => {
+        gui = await Gui.create();
       });
     </script>
   </head>
