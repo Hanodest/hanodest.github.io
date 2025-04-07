@@ -23,6 +23,7 @@ function detectLayerSettings(imageName, imageRule, context) {
     frameCount: 0,
     lineLength: numColumns,
     linesPerFile: numRows,
+    scale: serializedRule.scale || 0.5,
     blendMode: serializedRule.blendMode || 'normal',
     drawMode: serializedRule.drawMode || 'sprite',
     tint: '#ffffff',
@@ -53,10 +54,9 @@ function parseSingleLayerSettings(input) {
   } else {
     throw 'Either `size` or `width` and `height` fields must be present.';
   }
-  let scale = input.scale !== undefined ? input.scale : 1;
+  result.scale = input.scale !== undefined ? input.scale : 1;
   if (Array.isArray(input.shift)) {
-    result.shift = new Vector
-      (Math.floor(input.shift[0] * 32 / scale), Math.floor(input.shift[1] * 32 / scale));
+    result.shift = new Vector(Math.floor(input.shift[0] * 64), Math.floor(input.shift[1] * 64));
   } else {
     result.shift = new Vector(0, 0);
   }

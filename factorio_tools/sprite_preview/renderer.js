@@ -38,13 +38,16 @@ class Renderer {
     this.#layers = [];
   }
 
-  addImage(id, image) {
-    let canvas = new OffscreenCanvas(image.width, image.height);
+  addImage(id, image, scale) {
+    scale = scale || 1;
+    let width = image.width * scale;
+    let height = image.height * scale;
+    let canvas = new OffscreenCanvas(width, height);
     let context = canvas.getContext('2d');
-    context.drawImage(image, 0, 0);
+    context.drawImage(image, 0, 0, width, height);
     let imageMemory = this.#wasmRenderer.ccall(
-      'CreateImage', 'number', ['string', 'number', 'number'], [id, image.width, image.height]);
-    this.#wasmRenderer.HEAPU8.set(context.getImageData(0, 0, image.width, image.height).data,
+      'CreateImage', 'number', ['string', 'number', 'number'], [id, width, height]);
+    this.#wasmRenderer.HEAPU8.set(context.getImageData(0, 0, width, height).data,
       imageMemory);
   }
 

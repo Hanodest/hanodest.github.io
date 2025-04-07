@@ -5,17 +5,19 @@ class ImageFile extends EventTarget {
   #renderer;
   #imageId;
   #imageSize;
+  #scale;
 
   #filename;
   #title;
 
   #container;
 
-  constructor(renderer, filename) {
+  constructor(renderer, filename, scale) {
     super();
     this.#renderer = renderer;
     this.#imageId = undefined;
     this.#imageSize = undefined;
+    this.#scale = scale * 2;
 
     this.#filename = filename;
 
@@ -57,24 +59,25 @@ class ImageFile extends EventTarget {
       if (this.#imageId === undefined) {
         this.#imageId = crypto.randomUUID();
       }
-      this.#imageSize = new Vector(image.width, image.height);
-      this.#renderer.addImage(this.#imageId, image);
+      this.#imageSize = new Vector(image.width * this.#scale, image.height * this.#scale);
+      this.#renderer.addImage(this.#imageId, image, this.#scale);
       this.#container.classList.remove('missing-file');
       this.dispatchEvent(new CustomEvent('loaded'));
     });
   }
 
-  static fromResolvedContext(renderer, filename, context) {
-    let result = new ImageFile(renderer, filename);
+  static fromResolvedContext(renderer, filename, scale, context) {
+    let result = new ImageFile(renderer, filename, scale);
     result.#container.classList.remove('missing-file');
     result.#imageId = crypto.randomUUID();
-    result.#imageSize = new Vector(context.canvas.width, context.canvas.height);
-    result.#renderer.addImage(result.#imageId, context.canvas);
+    result.#imageSize = new Vector(
+      context.canvas.width * result.#scale, context.canvas.height * result.#scale);
+    result.#renderer.addImage(result.#imageId, context.canvas, result.#scale);
     return result;
   }
 
-  static fromFile(renderer, file) {
-    let result = new ImageFile(renderer, file.name);
+  static fromFile(renderer, file, scale) {
+    let result = new ImageFile(renderer, file.name, scale);
     result.reloadFromFile(file);
     return result;
   }

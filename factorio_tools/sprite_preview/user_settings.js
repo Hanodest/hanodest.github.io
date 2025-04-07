@@ -15,8 +15,10 @@ class ImageRule extends EventTarget {
   #suffixRegex;
   #columns;
   #rows;
+  #scale;
   #blendMode;
   #drawMode;
+  #ignore;
 
   #container;
 
@@ -29,10 +31,13 @@ class ImageRule extends EventTarget {
     this.#suffixRegex = createInput(serialized.suffixRegex, 'text');
     this.#columns = createInput(serialized.columns, 'number');
     this.#rows = createInput(serialized.rows, 'number');
+    this.#scale = createInput(serialized.scale, 'number');
     this.#blendMode = createBlendSelect();
     this.#blendMode.value = serialized.blendMode || 'normal';
     this.#drawMode = createDrawSelect();
     this.#drawMode.value = serialized.drawMode || 'sprite';
+    this.#ignore = createInput(undefined, 'checkbox');
+    this.#ignore.checked = serialized.ignore || false;
 
     let deleteButton = document.createElement('div');
     deleteButton.classList.add('delete-icon');
@@ -43,7 +48,8 @@ class ImageRule extends EventTarget {
     this.#container = document.createElement('div');
     this.#container.classList.add('image-rule');
     [this.#filename, this.#suffixRegex, this.#columns, this.#rows,
-    this.#blendMode, this.#drawMode, deleteButton].forEach(
+    this.#scale, this.#blendMode, this.#drawMode,
+    this.#ignore, deleteButton].forEach(
       (input) => {
         let cell = document.createElement('div');
         cell.classList.add('image-rule-cell');
@@ -58,8 +64,10 @@ class ImageRule extends EventTarget {
       suffixRegex: this.#suffixRegex.value,
       columns: parseInt(this.#columns.value) || undefined,
       rows: parseInt(this.#rows.value) || undefined,
+      scale: parseFloat(this.#scale.value) || undefined,
       blendMode: this.#blendMode.value,
-      drawMode: this.#drawMode.value
+      drawMode: this.#drawMode.value,
+      ignore: this.#ignore.checked,
     };
   }
 
@@ -120,14 +128,14 @@ class UserSettings extends EventTarget {
 
     this.#settingsTableHeader = document.createElement('div');
     this.#settingsTableHeader.classList.add('image-rule-header');
-    ['Filename', 'Sheet number', 'Columns', 'Rows', 'Blend mode', 'Draw mode'].forEach(
-      (text) => {
-        let columnHeader = document.createElement('div');
-        columnHeader.classList.add('image-rule-header-cell');
-        columnHeader.innerText = text;
-        this.#settingsTableHeader.appendChild(columnHeader);
-      }
-    )
+    ['Filename', 'Sheet number', 'Columns', 'Rows', 'Scale',
+      'Blend mode', 'Draw mode', 'Ignore'].forEach(
+        (text) => {
+          let columnHeader = document.createElement('div');
+          columnHeader.classList.add('image-rule-header-cell');
+          columnHeader.innerText = text;
+          this.#settingsTableHeader.appendChild(columnHeader);
+        });
     let addRule = document.createElement('div');
     addRule.classList.add('add-icon');
     addRule.addEventListener('click', () => {

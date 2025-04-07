@@ -60,6 +60,7 @@ class Layer extends EventTarget {
   #drawMode;
   #tintColor;
 
+  #scale;
   #sizeX;
   #sizeY;
   #shiftX;
@@ -148,7 +149,7 @@ class Layer extends EventTarget {
     addSpritesheetsInput.multiple = true;
     addSpritesheetsInput.addEventListener('change', () => {
       for (let file of addSpritesheetsInput.files) {
-        this.addImage(ImageFile.fromFile(this.#renderer, file));
+        this.addImage(ImageFile.fromFile(this.#renderer, file, this.scale));
       }
       addSpritesheetsInput.value = '';
     });
@@ -177,9 +178,10 @@ class Layer extends EventTarget {
     let dimensionsTable = document.createElement('div');
     dimensionsTable.classList.add('dimensions-table');
 
-    this.#sizeX = new NumberInput('Width:', 1, 2048, settings.size.x);
+    this.#scale = settings.scale || 0.5;
+    this.#sizeX = new NumberInput('Width:', 1, 2048, settings.size.x * this.#scale * 2);
     this.#sizeX.addEventListener('change', () => { this.#updateDimensions(); });
-    this.#sizeY = new NumberInput('Height:', 1, 2048, settings.size.y);
+    this.#sizeY = new NumberInput('Height:', 1, 2048, settings.size.y * this.#scale * 2);
     this.#sizeY.addEventListener('change', () => { this.#updateDimensions(); });
     this.#shiftX = new NumberInput('Shift x:', -1024, 1024, settings.shift.x);
     this.#shiftY = new NumberInput('Shift y:', -1024, 1024, settings.shift.y);
@@ -222,7 +224,7 @@ class Layer extends EventTarget {
     this.#container.replaceChildren(labelRow, layerSettings);
 
     settings.filenames.forEach((filename) => {
-      this.addImage(new ImageFile(this.#renderer, filename));
+      this.addImage(new ImageFile(this.#renderer, filename, this.scale));
     });
   }
 
@@ -315,12 +317,12 @@ class Layer extends EventTarget {
     }
     let result = {
       'priority': 'high',
-      'scale': 0.5,
+      'scale': this.#scale,
       'filename': this.#layerName,
       'filenames': this.#imageFiles.map((f) => f.filename),
       'blend_mode': this.blendMode,
-      'width': this.#size.x,
-      'height': this.#size.y,
+      'width': Math.round(this.#size.x / (this.#scale * 2)),
+      'height': Math.round(this.#size.y / (this.#scale * 2)),
       'line_length': this.#lineLength.value,
       'lines_per_file': this.#linesPerFile.value,
       'frame_count': this.#frameCount.value,
@@ -369,6 +371,10 @@ class Layer extends EventTarget {
       parseInt(color.substring(5, 7), 16),
       255
     ]
+  }
+
+  get scale() {
+    return this.#scale;
   }
 
   get boundingBox() {

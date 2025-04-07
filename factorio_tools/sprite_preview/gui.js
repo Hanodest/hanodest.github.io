@@ -121,7 +121,8 @@ class Gui {
 
     let layerSettings = detectLayerSettings(imageName, imageRule, context);
     let layer = this.addLayer(layerSettings);
-    layer.addImage(ImageFile.fromResolvedContext(this.#renderer, imageName, context));
+    layer.addImage(ImageFile.fromResolvedContext(
+      this.#renderer, imageName, layer.scale, context));
   }
 
   importSettings(parsedSettings) {
@@ -142,10 +143,13 @@ class Gui {
     }
     let filename = basename(file.name);
     let imageRule = this.#userSettings.getImageRule(filename);
+    if (imageRule.serialized.ignore) {
+      return;
+    }
     let layerName = imageRule.getLayerName(filename);
     for (let layer of this.#renderer.layers) {
       if (layer.name === layerName) {
-        layer.addImage(ImageFile.fromFile(this.#renderer, file));
+        layer.addImage(ImageFile.fromFile(this.#renderer, file, layer.scale));
         return;
       }
     }
