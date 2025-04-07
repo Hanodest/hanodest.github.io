@@ -11,11 +11,13 @@ import { UserSettings } from './user_settings.js';
 class Gui {
   #renderer;
   #frame;
+  #paused;
   #renderLoop;
 
   #background;
   #controls;
   #animationSpeed;
+  #pauseButton;
   #layersSettings;
   #canvas;
   #context;
@@ -31,8 +33,21 @@ class Gui {
     this.#layersSettings = document.getElementById('layers_settings');
     this.#animationSpeed = document.getElementById('animation_speed');
     this.#animationSpeed.addEventListener('dblclick', () => {
-      this.#animationSpeed.value = 60;
+      this.#animationSpeed.value = this.#userSettings.animationSpeed;
     });
+
+    document.getElementById('previous_button').addEventListener('click', () => {
+      this.#frame--;
+    });
+    this.#pauseButton = document.getElementById('pause_button');
+    this.#pauseButton.addEventListener('click', () => {
+      this.#paused = !this.#paused;
+      this.#pauseButton.classList.toggle('paused', this.#paused);
+    });
+    document.getElementById('next_button').addEventListener('click', () => {
+      this.#frame++
+    });
+
     this.#background = document.getElementById('background');
 
     this.#canvas = document.getElementById('image');
@@ -48,6 +63,7 @@ class Gui {
       this.#layersSettings.classList.toggle('inverted-order', this.#userSettings.invertLayerOrder);
     });
     this.#layersSettings.classList.toggle('inverted-order', this.#userSettings.invertLayerOrder);
+    this.#animationSpeed.value = this.#userSettings.animationSpeed;
 
     this.setupHandlers();
     this.reset();
@@ -57,6 +73,9 @@ class Gui {
     this.#controls.classList.add('hidden');
 
     this.#frame = 0;
+    this.#paused = false;
+    this.#pauseButton.classList.toggle('paused', false);
+    this.#pauseButton
     this.#background.value = 'lab';
 
     if (typeof (this.#renderLoop) != 'undefined') {
@@ -70,12 +89,17 @@ class Gui {
   drawSprite() {
     let dayNight = parseInt(document.getElementById('day_night').value);
     let frameStart = performance.now();
-    this.#renderer.draw(this.#frame++, dayNight / 256, this.#background.value, this.#context);
+    this.#renderer.draw(this.#frame, dayNight / 256, this.#background.value, this.#context);
     let frameEnd = performance.now();
 
-    let animationSpeed = parseInt(this.#animationSpeed.value);
-    this.#renderLoop = setTimeout(() => { this.drawSprite(); },
-      Math.max(0, 1000 / animationSpeed - (frameEnd - frameStart)));
+    if (this.#paused) {
+      this.#renderLoop = setTimeout(() => { this.drawSprite(); }, 0);
+    } else {
+      this.#frame++;
+      let animationSpeed = parseInt(this.#animationSpeed.value);
+      this.#renderLoop = setTimeout(() => { this.drawSprite(); },
+        Math.max(0, 1000 / animationSpeed - (frameEnd - frameStart)));
+    }
   }
 
   addLayer(layerSettings) {

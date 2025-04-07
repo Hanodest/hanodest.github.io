@@ -96,6 +96,7 @@ class ImageRule extends EventTarget {
 class UserSettings extends EventTarget {
   #imageRules;
   #invertLayerOrder;
+  #animationSpeed;
 
   #container;
   #settingsTableHeader;
@@ -107,6 +108,8 @@ class UserSettings extends EventTarget {
     super();
     this.#invertLayerOrder = document.createElement('input');
     this.#invertLayerOrder.type = 'checkbox';
+    this.#animationSpeed = document.createElement('input');
+    this.#animationSpeed.type = 'number';
     try {
       let serialized = JSON.parse(localStorage.getItem('sprite_preview_settings'));
       this.#imageRules = serialized.imageRules.map((serializedRule) => {
@@ -115,9 +118,11 @@ class UserSettings extends EventTarget {
         return rule;
       });
       this.#invertLayerOrder.checked = serialized.invertLayerOrder;
+      this.#animationSpeed.value = serialized.animationSpeed || 60;
     } catch (e) {
       this.#imageRules = [];
       this.#invertLayerOrder.checked = false;
+      this.#animationSpeed.value = 60;
     }
 
     let invertLabel = document.createElement('div');
@@ -125,6 +130,12 @@ class UserSettings extends EventTarget {
     let invertRow = document.createElement('div');
     invertRow.classList.add('flex-horizontal', 'white');
     invertRow.replaceChildren(this.#invertLayerOrder, invertLabel);
+
+    let animationSpeedLabel = document.createElement('div');
+    animationSpeedLabel.innerText = 'Default animation speed (fps):';
+    let animationSpeedRow = document.createElement('div');
+    animationSpeedRow.classList.add('flex-horizontal', 'white');
+    animationSpeedRow.replaceChildren(animationSpeedLabel, this.#animationSpeed);
 
     this.#settingsTableHeader = document.createElement('div');
     this.#settingsTableHeader.classList.add('image-rule-header');
@@ -149,7 +160,7 @@ class UserSettings extends EventTarget {
     let header = document.getElementById('settings_header');
     this.#settingsTable = document.createElement('div');
     this.#container = document.createElement('div');
-    this.#container.replaceChildren(invertRow, header, this.#settingsTable);
+    this.#container.replaceChildren(invertRow, animationSpeedRow, header, this.#settingsTable);
     this.#overlay = new Overlay(this);
     this.#overlay.addEventListener('close', () => {
       this.#saveSettings();
@@ -167,7 +178,8 @@ class UserSettings extends EventTarget {
         rule.update();
         return rule.serialized;
       }),
-      invertLayerOrder: this.#invertLayerOrder.checked
+      invertLayerOrder: this.#invertLayerOrder.checked,
+      animationSpeed: this.animationSpeed
     };
     localStorage.setItem('sprite_preview_settings', JSON.stringify(serialized));
     this.dispatchEvent(new CustomEvent('settingsUpdated'));
@@ -192,6 +204,10 @@ class UserSettings extends EventTarget {
 
   get invertLayerOrder() {
     return this.#invertLayerOrder.checked;
+  }
+
+  get animationSpeed() {
+    return parseInt(this.#animationSpeed.value) || 60;
   }
 
   get container() {
