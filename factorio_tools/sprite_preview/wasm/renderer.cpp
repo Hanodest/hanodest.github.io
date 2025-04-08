@@ -26,8 +26,8 @@ public:
   uint8_t r, g, b, a;
 };
 
-uint8_t day_lut[16384];
-uint8_t night_lut[16384];
+uint8_t day_lut[32768];
+uint8_t night_lut[32768];
 
 class Canvas {
 public:
@@ -215,20 +215,45 @@ public:
 
   void ApplyLight() {
     for (int32_t i = 0; i < size; i++) {
-      const int32_t color =
-          ((static_cast<int32_t>(image[4 * i]) >> 4) +
-           ((static_cast<int32_t>(image[4 * i + 1]) >> 4) << 8) +
-           ((static_cast<int32_t>(image[4 * i + 2]) >> 4) << 4)) *
-          4;
-      const int32_t r = lightmap[4 * i];
-      image[4 * i] =
-          ToByte((day_lut[color] * r + night_lut[color] * (255 - r)) / 255);
-      const int32_t g = lightmap[4 * i + 1];
-      image[4 * i + 1] = ToByte(
-          (day_lut[color + 1] * g + night_lut[color + 1] * (255 - g)) / 255);
-      const int32_t b = lightmap[4 * i + 2];
-      image[4 * i + 2] = ToByte(
-          (day_lut[color + 2] * b + night_lut[color + 2] * (255 - b)) / 255);
+      const int32_t red_high = image[4 * i] / 17;
+      int32_t red_low = image[4 * i] % 17;
+      const int32_t green_high = image[4 * i + 1] / 17;
+      int32_t green_low = image[4 * i + 1] % 17;
+      const int32_t blue_high = image[4 * i + 2] / 17;
+      int32_t blue_low = image[4 * i + 2] % 17;
+
+      int32_t red_light = 0, red_dark = 0;
+      int32_t green_light = 0, green_dark = 0;
+      int32_t blue_light = 0, blue_dark = 0;
+      for (int32_t rr = 0; rr < 2; rr++) {
+        red_low = 16 - red_low;
+        for (int32_t gg = 0; gg < 2; gg++) {
+          green_low = 16 - green_low;
+          for (int32_t bb = 0; bb < 2; bb++) {
+            blue_low = 16 - blue_low;
+            const int32_t color =
+                ((red_high + rr) << 2 | ((green_high + gg) << 10) |
+                 ((blue_high + bb) << 6));
+            const int32_t mul = red_low * green_low * blue_low;
+            red_light += day_lut[color] * mul;
+            red_dark += night_lut[color] * mul;
+            green_light += day_lut[color + 1] * mul;
+            green_dark += night_lut[color + 1] * mul;
+            blue_light += day_lut[color + 2] * mul;
+            blue_dark += night_lut[color + 2] * mul;
+          }
+        }
+      }
+
+      image[4 * i + 0] = ToByte((red_light * lightmap[4 * i + 0] +
+                                 red_dark * (255 - lightmap[4 * i + 0])) /
+                                1044480);
+      image[4 * i + 1] = ToByte((green_light * lightmap[4 * i + 1] +
+                                 green_dark * (255 - lightmap[4 * i + 1])) /
+                                1044480);
+      image[4 * i + 2] = ToByte((blue_light * lightmap[4 * i + 2] +
+                                 blue_dark * (255 - lightmap[4 * i + 2])) /
+                                1044480);
     }
   }
 
