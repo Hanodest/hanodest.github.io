@@ -112,13 +112,7 @@ class UserSettings extends EventTarget {
     this.#animationSpeed.type = 'number';
     try {
       let serialized = JSON.parse(localStorage.getItem('sprite_preview_settings'));
-      this.#imageRules = serialized.imageRules.map((serializedRule) => {
-        let rule = new ImageRule(serializedRule);
-        rule.addEventListener('delete', () => { this.#deleteRule(rule); });
-        return rule;
-      });
-      this.#invertLayerOrder.checked = serialized.invertLayerOrder;
-      this.#animationSpeed.value = serialized.animationSpeed || 60;
+      this.#restore(serialized);
     } catch (e) {
       this.#imageRules = [];
       this.#invertLayerOrder.checked = false;
@@ -157,10 +151,21 @@ class UserSettings extends EventTarget {
     })
     this.#settingsTableHeader.appendChild(addRule);
 
+    let importExport = document.createElement('div');
+    importExport.classList.add('right-aligned');
+    let importButton = document.createElement('div');
+    importButton.classList.add('import-icon');
+    importButton.addEventListener('click', () => { this.#importSettings(); });
+    let exportButton = document.createElement('div');
+    exportButton.classList.add('export-icon');
+    exportButton.addEventListener('click', () => { this.#exportSettings(); });
+    importExport.replaceChildren(importButton, exportButton);
+
     let header = document.getElementById('settings_header');
     this.#settingsTable = document.createElement('div');
     this.#container = document.createElement('div');
-    this.#container.replaceChildren(invertRow, animationSpeedRow, header, this.#settingsTable);
+    this.#container.replaceChildren(
+      invertRow, animationSpeedRow, header, this.#settingsTable, importExport);
     this.#overlay = new Overlay(this);
     this.#overlay.addEventListener('close', () => {
       this.#saveSettings();
@@ -173,7 +178,33 @@ class UserSettings extends EventTarget {
   }
 
   #saveSettings() {
-    let serialized = {
+    localStorage.setItem('sprite_preview_settings', JSON.stringify(this.#serialize()));
+    this.dispatchEvent(new CustomEvent('settingsUpdated'));
+  }
+
+  #exportSettings() {
+    navigator.clipboard.writeText(JSON.stringify(this.#serialize(), undefined, 2));
+  }
+
+  #importSettings() {
+    try {
+      navigator.clipboard.readText().then((text) => {
+        let serialized = JSON.parse(text);
+        if (!Array.isArray(serialized.imageRules)) {
+          return;
+        }
+        this.#restore(serialized);
+        this.#settingsTable.replaceChildren();
+        this.#imageRules.forEach((rule) => {
+          this.#settingsTable.appendChild(rule.container);
+        });
+      });
+    } catch (e) {
+    }
+  }
+
+  #serialize() {
+    return {
       imageRules: this.#imageRules.map((rule) => {
         rule.update();
         return rule.serialized;
@@ -181,8 +212,16 @@ class UserSettings extends EventTarget {
       invertLayerOrder: this.#invertLayerOrder.checked,
       animationSpeed: this.animationSpeed
     };
-    localStorage.setItem('sprite_preview_settings', JSON.stringify(serialized));
-    this.dispatchEvent(new CustomEvent('settingsUpdated'));
+  }
+
+  #restore(serialized) {
+    this.#imageRules = serialized.imageRules.map((serializedRule) => {
+      let rule = new ImageRule(serializedRule);
+      rule.addEventListener('delete', () => { this.#deleteRule(rule); });
+      return rule;
+    });
+    this.#invertLayerOrder.checked = serialized.invertLayerOrder;
+    this.#animationSpeed.value = serialized.animationSpeed || 60;
   }
 
   show() {
