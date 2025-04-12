@@ -1,6 +1,6 @@
 import { clamp } from './util.js';
 import { Vector } from './vector.js';
-import { NumberInput } from './numberInput.js';
+import { NumberInput } from './number_input.js';
 
 const EPS = 1e-7;
 

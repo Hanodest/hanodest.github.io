@@ -1,7 +1,7 @@
 import { basename } from './util.js';
 import { detectLayerSettings } from './layer_settings.js';
 import { loadImageFromFile } from './image.js';
-import { ImageFile } from './imageFile.js';
+import { ImageFile } from './image_file.js';
 import { Layer } from './layer.js';
 import { Renderer } from './renderer.js';
 import { ExportUi } from './export_ui.js';

@@ -1,7 +1,7 @@
 import { BoundingBox } from './bounding_box.js';
 import { ColorPicker } from './color_picker.js';
-import { ImageFile } from './imageFile.js';
-import { NumberInput } from './numberInput.js';
+import { ImageFile } from './image_file.js';
+import { NumberInput } from './number_input.js';
 import { Vector } from './vector.js';
 
 function createSelect(options) {
