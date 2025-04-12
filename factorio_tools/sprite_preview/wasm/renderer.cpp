@@ -168,10 +168,10 @@ public:
         const uint32_t alpha = draw_from[3] * tint.a / 255;
         const uint8_t mul0 =
             ToByte((draw_from[0] * alpha * tint.r * draw_to[0]) / 16581375);
-        draw_to[0] = ToByte((mul0 * alpha + draw_to[1] * (255 - alpha)) / 255);
+        draw_to[0] = ToByte((mul0 * alpha + draw_to[0] * (255 - alpha)) / 255);
         const uint8_t mul1 =
             ToByte((draw_from[1] * alpha * tint.r * draw_to[1]) / 16581375);
-        draw_to[1] = ToByte((mul1 * alpha + draw_to[2] * (255 - alpha)) / 255);
+        draw_to[1] = ToByte((mul1 * alpha + draw_to[1] * (255 - alpha)) / 255);
         const uint8_t mul2 =
             ToByte((draw_from[2] * alpha * tint.r * draw_to[2]) / 16581375);
         draw_to[2] = ToByte((mul2 * alpha + draw_to[2] * (255 - alpha)) / 255);
