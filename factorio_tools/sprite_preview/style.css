@@ -96,6 +96,14 @@ body {
   margin: 0px 4px 0px 4px;
 }
 
+.download-icon {
+  background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAQAAADZc7J/AAAAAXNSR0IB2cksfwAAAARnQU1BAACxjwv8YQUAAAAgY0hSTQAAeiYAAICEAAD6AAAAgOgAAHUwAADqYAAAOpgAABdwnLpRPAAAAAlwSFlzAAATrwAAE68BY+aOwwAAAAd0SU1FB+kEDBYtC+2apTcAAAG1SURBVHjardND+BVRGIDxM8htss1Nttvm1V1mc5uxy3btsm1twjrbtq235zn9T/PNnb6Jv4vxOzb/CXWYwTrxaSqWlaM/M1jJPEbRGM8kMZiPxGWMRQP28xXpOj3wjURdsbkI4DFWbCwdoogMzASgN4GJYSG6CyLBWoDE5kNIdxB3IqwDMDEU52XymhDXLS0wDX4ZuIqnB66pAamREqAqkh4YoQXaIq3mgwuwmRdE5muBzkQm2Okudv5SfJqJxHIt0ATnEaXsHN/947MJZ5oWKMoXnPM2kQOfpUT66XfhGJELlDYWHguIfKWsHugLII8isXfYk/YghZxFukRfNiJ9oa4WsKjLa9KMNFYiQE2aUNCOdUxJzMf7SYD6nALgLePw7FGcIekFA4wjA9TlOZFJdllAb47wBecqkylml2TI0EwEqMw94nqaHBSmCV1oTWXzAwDrZOAC2d7RSNyV3ixlLu2VgOIO9hGiMidwlpM7O7AB3VHy0Ij7SLvIEw+cJc0uXiK4RDzw57YBsNYGmMNfkK9zQ77yN75Q33zHMD7x50abCLXZwk1uKZ9TrGcd8jON+ub/+AZsyf21sdQzWAAAAABJRU5ErkJggg==");
+  background-size: 100%;
+  width: 32px;
+  height: 32px;
+  margin: 0px 4px 0px 4px;
+}
+
 .user-settings-icon {
   background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAQAAADZc7J/AAAAAXNSR0IB2cksfwAAAARnQU1BAACxjwv8YQUAAAAgY0hSTQAAeiYAAICEAAD6AAAAgOgAAHUwAADqYAAAOpgAABdwnLpRPAAAAAlwSFlzAAAAegAAAHoBlQypfwAAAAd0SU1FB+kDHxc5IenB9eIAAAIJSURBVHjandIDkCVJEADQPNu2bdu2bdu2bds2Q2fbtte29y0qI/riz/ToNbOsSMmsXvWTt80ZHeM4xVnRHqb0iDes5XSdFN2dZ0Nve8Dk0TqvqfdytMaERqs3NFrncvUuiNa5kPSXQ6xtf7+QromWmc5m/lP8brpMndoPit72M1vU85nKPlW67VS+iXoqLFOlW7i5hTStKSMlg1V2rtJtqtIl027CvxaI/7OJRwxUfG7iTJ3Qu4pBrrVCHvMB4CnruNAj5o0UbpB8YCOzWNebkrsiXK2f57J65dNIYT/1DrCcVNOACfVRr7vZ9JAMN1jyQqTQSb3fI7ygeMyCprJzNsg1ligNLK6LYc5yryGKoR52sZH+tYidc5E7mzDGc5Lk1yhMaprx3ysUx46PZjKpoyW3RTKHpH+kZF1D0NsykVxM+iySfRQ/2jMamcX8ZrCCj5wyPl7IN4YoDjRhhCV9rlgtmrK6TS2fRba1sJUj7Evq5lWjSCtFIwsZqdGe1tC8u5prYLhGRzpVo6EYbftoZH6jwGO2dp1BOYJ5fWe0qz2ruM+MNrRqNLKxTuDNjC8D3e1tYlOMT/kFo6wRzfOq4qSM11J0jmQep9g06ljPb+CjjK8H/R0XbWUOI8FbDvaY4WD7aDura2rLaDvLG2W0UVI1gjazjOUspBM6Wdk6toiOsKNv7BJtMAYDo8+jrOgahAAAAABJRU5ErkJggg==");
   background-size: 100%;
@@ -226,6 +234,13 @@ input[type="number"] {
 
 .number-input-caption {
   margin: 4px;
+}
+
+.download-progress {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  margin: 0px 4px 0px 4px;
 }
 
 .dimensions-container {

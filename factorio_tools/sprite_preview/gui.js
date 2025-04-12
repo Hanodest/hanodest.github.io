@@ -7,9 +7,12 @@ import { Renderer } from './renderer.js';
 import { ExportUi } from './export_ui.js';
 import { ImportUi } from './import_ui.js';
 import { UserSettings } from './user_settings.js';
+import { WebpExporter } from './webp_exporter.js';
 
 class Gui {
   #renderer;
+  #webpExporter;
+
   #frame;
   #paused;
   #renderLoop;
@@ -18,6 +21,8 @@ class Gui {
   #controls;
   #animationSpeed;
   #pauseButton;
+  #downloadButton;
+  #downloadProgress;
   #layersSettings;
   #canvas;
   #context;
@@ -28,6 +33,10 @@ class Gui {
 
   constructor(renderer) {
     this.#renderer = renderer;
+    this.#webpExporter = new WebpExporter(renderer);
+    this.#webpExporter.addEventListener('progress', (e) => {
+      this.#setDownloadProgress(e.detail.value);
+    });
 
     this.#controls = document.getElementById('global_controls');
     this.#layersSettings = document.getElementById('layers_settings');
@@ -47,6 +56,9 @@ class Gui {
     document.getElementById('next_button').addEventListener('click', () => {
       this.#frame++
     });
+
+    this.#downloadButton = document.getElementById('download_button');
+    this.#downloadProgress = document.getElementById('download_progress');
 
     this.#background = document.getElementById('background');
 
@@ -85,18 +97,29 @@ class Gui {
     this.#pauseButton
     this.#background.value = 'lab';
 
+    this.#downloadButton.classList.add('hidden');
+    this.#downloadProgress.classList.add('hidden');
+
     if (typeof (this.#renderLoop) != 'undefined') {
       clearTimeout(this.#renderLoop);
       this.#renderLoop = undefined;
     }
 
-    this.#renderer.draw(/*frame=*/0, /*daytime=*/0, this.#background.value, this.#context);
+    this.#drawImageData(
+      this.#renderer.draw(/*frame=*/0, /*daytime=*/0, this.#background.value));
+  }
+
+  #drawImageData(imageData) {
+    this.#canvas.width = imageData.width;
+    this.#canvas.height = imageData.height;
+    this.#context.putImageData(imageData, 0, 0);
   }
 
   drawSprite() {
     let dayNight = parseInt(document.getElementById('day_night').value);
     let frameStart = performance.now();
-    this.#renderer.draw(this.#frame, dayNight / 256, this.#background.value, this.#context);
+    this.#drawImageData(
+      this.#renderer.draw(this.#frame, dayNight / 256, this.#background.value));
     let frameEnd = performance.now();
 
     if (this.#paused) {
@@ -138,6 +161,7 @@ class Gui {
     if (this.#renderer.layers.length == 0) {
       this.reset();
     } else {
+      this.#downloadButton.classList.remove('hidden');
       this.#controls.classList.remove('hidden');
       if (this.#renderLoop === undefined) {
         this.#renderLoop = setTimeout(() => { this.drawSprite(); }, 0);
@@ -198,6 +222,9 @@ class Gui {
     document.getElementById('add_layer').addEventListener('click', () => {
       fileInput.click();
     });
+    this.#downloadButton.addEventListener('click', () => {
+      this.#exportAnimation();
+    });
     document.getElementById('export_settings').addEventListener('click', () => {
       this.#exportUi.show(this.#renderer.exportSettings());
     });
@@ -209,11 +236,41 @@ class Gui {
     });
   }
 
+  async #exportAnimation() {
+    if (this.#renderLoop === undefined) {
+      return;
+    }
+    clearTimeout(this.#renderLoop);
+    this.#downloadButton.classList.add('hidden');
+    this.#downloadProgress.classList.remove('hidden');
+    this.#setDownloadProgress(0);
+
+    let frameDuration = Math.floor(1000 / parseInt(this.#animationSpeed.value));
+
+    let dayNight = parseInt(document.getElementById('day_night').value) / 256;
+    let animation = await this.#webpExporter.exportAnimation(
+      dayNight, this.#background.value, frameDuration);
+
+    let link = document.createElement('a');
+    link.href = URL.createObjectURL(animation);
+    link.download = 'animation.webp';
+    link.click();
+
+    this.#downloadButton.classList.remove('hidden');
+    this.#downloadProgress.classList.add('hidden');
+    this.#renderLoop = setTimeout(() => { this.drawSprite(); }, 0);
+  }
+
+  #setDownloadProgress(progress) {
+    this.#downloadProgress.style.background = `
+        radial-gradient(closest-side, #303030 50%, transparent 51% 100%),
+        conic-gradient(white ${progress * 100}%, black 0) `;
+  }
+
   static async create() {
     let render = await Renderer.create();
     return new Gui(render);
   }
-
 };
 
 export { Gui };

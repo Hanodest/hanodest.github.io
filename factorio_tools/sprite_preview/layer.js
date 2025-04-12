@@ -369,6 +369,10 @@ class Layer extends EventTarget {
     return this.#scale;
   }
 
+  get frameCount() {
+    return this.#frameCount.value;
+  }
+
   get boundingBox() {
     let center = new Vector(this.#size.x >> 1, this.#size.y >> 1);
     return new BoundingBox(

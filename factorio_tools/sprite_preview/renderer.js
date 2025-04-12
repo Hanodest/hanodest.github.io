@@ -51,12 +51,30 @@ class Renderer {
       imageMemory);
   }
 
-  draw(frame, daytime, backgroundName, context) {
+  #getBoundingBox() {
     let boundingBox = this.#layers.length == 0
       ? new BoundingBox(new Vector(-64, -64), new Vector(64, 64))
       : this.#layers.map((layer) => layer.boundingBox).reduce((b1, b2) => b1.union(b2));
-    let topLeft = boundingBox.topLeft.subtract(new Vector(64, 64));
-    let bottomRight = boundingBox.bottomRight.add(new Vector(64, 64));
+    return [
+      boundingBox.topLeft.subtract(new Vector(64, 64)),
+      boundingBox.bottomRight.add(new Vector(64, 64))];
+  }
+
+  getRenderSize() {
+    let [topLeft, bottomRight] = this.#getBoundingBox();
+    return [bottomRight.x - topLeft.x, bottomRight.y - topLeft.y];
+  }
+
+  getFrameCount() {
+    let result = 0;
+    this.#layers.forEach((layer) => {
+      result = Math.max(result, layer.frameCount);
+    });
+    return result;
+  }
+
+  draw(frame, daytime, backgroundName) {
+    let [topLeft, bottomRight] = this.#getBoundingBox();
     if (this.#wasmRenderer !== undefined) {
       this.#wasmRenderer.ccall('InitCanvas', 'undefined', ['number', 'number', 'number', 'number'],
         [topLeft.x, topLeft.y, bottomRight.x, bottomRight.y]);
@@ -65,9 +83,6 @@ class Renderer {
 
     let width = bottomRight.x - topLeft.x;
     let height = bottomRight.y - topLeft.y;
-    let canvas = context.canvas;
-    canvas.width = width;
-    canvas.height = height;
 
     this.#layers.forEach((layer) => {
       if (layer.drawMode != 'shadow') {
@@ -117,7 +132,7 @@ class Renderer {
     let renderResult = this.#wasmRenderer.ccall('ApplyLight', 'number', [], []);
     data.data.set(this.#wasmRenderer.HEAPU8.slice(
       renderResult, renderResult + width * height * 4));
-    context.putImageData(data, 0, 0);
+    return data;
   }
 
   exportSettings() {
