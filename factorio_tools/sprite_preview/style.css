@@ -188,8 +188,9 @@ select, .box-light {
   margin: 0px;
 }
 
-canvas {
+.main-image {
   margin: -4px -4px -8px;
+  cursor: copy;
 }
 
 select {

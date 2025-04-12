@@ -51,6 +51,13 @@ class Gui {
     this.#background = document.getElementById('background');
 
     this.#canvas = document.getElementById('image');
+    this.#canvas.addEventListener('click', () => {
+      this.#canvas.toBlob(async (blob) => {
+        await navigator.clipboard.write([
+          new ClipboardItem({ [blob.type]: blob, })
+        ]);
+      });
+    });
     this.#context = this.#canvas.getContext('2d', { willReadFrequently: true });
 
     this.#exportUi = new ExportUi();
