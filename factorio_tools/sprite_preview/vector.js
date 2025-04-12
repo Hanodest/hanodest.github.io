@@ -31,6 +31,18 @@ class Vector {
     return new Vector(this.x - other.x, this.y - other.y);
   }
 
+  vmul(other) {
+    return this.x * other.y - other.x * this.y;
+  }
+
+  smul(other) {
+    return this.x * other.x + this.y * other.y;
+  }
+
+  get len() {
+    return Math.sqrt(this.smul(this));
+  }
+
   min(other) {
     return new Vector(Math.min(this.x, other.x), Math.min(this.y, other.y));
   }

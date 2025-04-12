@@ -1,4 +1,5 @@
 import { BoundingBox } from './bounding_box.js';
+import { ColorPicker } from './color_picker.js';
 import { ImageFile } from './imageFile.js';
 import { NumberInput } from './numberInput.js';
 import { Vector } from './vector.js';
@@ -209,13 +210,11 @@ class Layer extends EventTarget {
     this.#blendMode.value = settings.blendMode;
     this.#drawMode = createDrawSelect();
     this.#drawMode.value = settings.drawMode;
-    this.#tintColor = document.createElement('input');
-    this.#tintColor.type = 'color';
-    this.#tintColor.value = settings.tint;
+    this.#tintColor = new ColorPicker(settings.tint);
 
     let colorControls = document.createElement('div');
     colorControls.classList.add('right-aligned');
-    colorControls.replaceChildren(this.#tintColor, this.#drawMode, this.#blendMode);
+    colorControls.replaceChildren(this.#tintColor.container, this.#drawMode, this.#blendMode);
 
     let layerSettings = document.createElement('div');
     layerSettings.classList.add('collapsible');
@@ -339,7 +338,6 @@ class Layer extends EventTarget {
       result['draw_as_shadow'] = true;
     }
     result.tint = this.tint.map((color) => color / 255);
-    result.tint.push(1);
     return result;
   }
 
@@ -364,13 +362,7 @@ class Layer extends EventTarget {
   }
 
   get tint() {
-    let color = this.#tintColor.value;
-    return [
-      parseInt(color.substring(1, 3), 16),
-      parseInt(color.substring(3, 5), 16),
-      parseInt(color.substring(5, 7), 16),
-      255
-    ]
+    return this.#tintColor.value;
   }
 
   get scale() {

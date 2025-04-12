@@ -15,7 +15,7 @@ class Overlay extends EventTarget {
     header.appendChild(closeButton);
 
     let overlayWindow = document.createElement('div');
-    overlayWindow.classList.add('outer-frame', 'flex-vertical');
+    overlayWindow.classList.add('outer-frame', 'flex-vertical', 'main-window');
     overlayWindow.addEventListener(('click'), (e) => {
       e.stopPropagation();
     });
