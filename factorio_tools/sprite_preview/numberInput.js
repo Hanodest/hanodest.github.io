@@ -33,7 +33,18 @@ class NumberInput extends EventTarget {
         parseInt(this.#textInput.value) || 0,
         this.#minValue, this.#maxValue);
       this.#textInput.value = this.#currentValue;
-      this.#triggerCallback();
+      this.dispatchEvent(new CustomEvent('change', {
+        detail: { value: this.#currentValue }
+      }));
+    });
+
+    this.#textInput.addEventListener('input', () => {
+      this.#currentValue = clamp(
+        parseInt(this.#textInput.value) || 0,
+        this.#minValue, this.#maxValue);
+      this.dispatchEvent(new CustomEvent('input', {
+        detail: { value: this.#currentValue }
+      }));
     });
 
     this.reset();
@@ -55,12 +66,6 @@ class NumberInput extends EventTarget {
 
   safe_reset(value) {
     this.reset(clamp(value, this.#minValue, this.#maxValue));
-  }
-
-  #triggerCallback() {
-    this.dispatchEvent(new CustomEvent('change', {
-      detail: { value: this.#currentValue }
-    }));
   }
 }
 

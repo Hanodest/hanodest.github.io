@@ -191,12 +191,16 @@ class PickerUi extends EventTarget {
     };
     this.#red = new NumberInput('r', 0, 255, 255);
     this.#red.addEventListener('change', applyRgba);
+    this.#red.addEventListener('input', applyRgba);
     this.#green = new NumberInput('g', 0, 255, 255);
     this.#green.addEventListener('change', applyRgba);
+    this.#green.addEventListener('input', applyRgba);
     this.#blue = new NumberInput('b', 0, 255, 255);
     this.#blue.addEventListener('change', applyRgba);
+    this.#blue.addEventListener('input', applyRgba);
     this.#alpha = new NumberInput('a', 0, 255, 255);
     this.#alpha.addEventListener('change', applyRgba);
+    this.#alpha.addEventListener('input', applyRgba);
 
     let inputs = document.createElement('div');
     inputs.classList.add('flex-horizontal', 'flex-spaced');
