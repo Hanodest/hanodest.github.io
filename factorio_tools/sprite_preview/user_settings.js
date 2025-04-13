@@ -47,17 +47,47 @@ class ImageRule extends EventTarget {
       this.dispatchEvent(new CustomEvent('delete'));
     });
 
+    let dragTarget = document.createElement('div');
+    dragTarget.classList.add('drag-block-small');
+    dragTarget.draggable = true;
+
     this.#container = document.createElement('div');
     this.#container.classList.add('image-rule');
-    [this.#filename, this.#suffixRegex, this.#columns, this.#rows,
-    this.#scale, this.#blendMode, this.#drawMode,
-    this.#ignore, this.#priority, deleteButton].forEach(
-      (input) => {
-        let cell = document.createElement('div');
-        cell.classList.add('image-rule-cell');
-        cell.appendChild(input);
-        this.#container.appendChild(cell);
-      });
+    [dragTarget, this.#filename, this.#suffixRegex, this.#columns, this.#rows,
+      this.#scale, this.#blendMode, this.#drawMode,
+      this.#ignore, this.#priority, deleteButton].forEach(
+        (input) => {
+          let cell = document.createElement('div');
+          cell.classList.add('image-rule-cell');
+          cell.appendChild(input);
+          this.#container.appendChild(cell);
+        });
+
+    this.#container.addEventListener('dragstart', (event) => {
+      let elementIndex =
+        Array.from(this.#container.parentNode.children).indexOf(this.#container);
+      event.dataTransfer.setData('text/plain', elementIndex);
+    });
+    this.#container.addEventListener('dragenter', (event) => {
+      event.preventDefault();
+    });
+    this.#container.addEventListener('dragover', (event) => {
+      event.preventDefault();
+    });
+    this.#container.addEventListener('drop', (event) => {
+      let dragStartIndex = parseInt(event.dataTransfer.getData('text/plain')) - 1;
+      let dragEndIndex =
+        Array.from(this.#container.parentNode.children).indexOf(this.#container) - 1;
+      if (dragStartIndex != dragEndIndex) {
+        this.dispatchEvent(new CustomEvent('moveRule', {
+          detail: {
+            dragStart: dragStartIndex,
+            dragEnd: dragEndIndex
+          }
+        }));
+      }
+      event.preventDefault();
+    });
   }
 
   update() {
@@ -136,7 +166,7 @@ class UserSettings extends EventTarget {
 
     this.#settingsTableHeader = document.createElement('div');
     this.#settingsTableHeader.classList.add('image-rule-header');
-    ['Filename', 'Sheet number', 'Columns', 'Rows', 'Scale',
+    ['', 'Filename', 'Sheet number', 'Columns', 'Rows', 'Scale',
       'Blend mode', 'Draw mode', 'Ignore', 'Priority'].forEach(
         (text) => {
           let columnHeader = document.createElement('div');
@@ -149,6 +179,7 @@ class UserSettings extends EventTarget {
     addRule.addEventListener('click', () => {
       let rule = new ImageRule({});
       rule.addEventListener('delete', () => { this.#deleteRule(rule); });
+      rule.addEventListener('moveRule', (e) => { this.#moveRule(e.detail); });
       this.#imageRules.push(rule);
       this.#settingsTable.appendChild(rule.container);
     })
@@ -178,6 +209,14 @@ class UserSettings extends EventTarget {
   #deleteRule(rule) {
     this.#settingsTable.removeChild(rule.container);
     this.#imageRules = this.#imageRules.filter((r) => r !== rule);
+  }
+
+  #moveRule(moveSettings) {
+    let moveFrom = moveSettings.dragStart;
+    let moveTo = moveSettings.dragEnd;
+    let ruleToMove = this.#imageRules.splice(moveFrom, 1)[0];
+    this.#imageRules.splice(moveTo, 0, ruleToMove);
+    this.show();
   }
 
   #saveSettings() {
@@ -221,6 +260,7 @@ class UserSettings extends EventTarget {
     this.#imageRules = serialized.imageRules.map((serializedRule) => {
       let rule = new ImageRule(serializedRule);
       rule.addEventListener('delete', () => { this.#deleteRule(rule); });
+      rule.addEventListener('moveRule', (e) => { this.#moveRule(e.detail); });
       return rule;
     });
     this.#invertLayerOrder.checked = serialized.invertLayerOrder;
