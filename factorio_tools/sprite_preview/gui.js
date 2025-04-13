@@ -1,5 +1,5 @@
 import { basename } from './util.js';
-import { detectLayerSettings } from './layer_settings.js';
+import { detectLayerSettings, parseLayerSettings } from './layer_settings.js';
 import { loadImageFromFile } from './image.js';
 import { ImageFile } from './image_file.js';
 import { Layer } from './layer.js';
@@ -75,7 +75,7 @@ class Gui {
     this.#exportUi = new ExportUi();
     this.#importUi = new ImportUi();
     this.#importUi.addEventListener('settingsImported', (event) => {
-      this.importSettings(event.detail);
+      this.importSettings(event.detail, /*clear=*/true);
     });
     this.#userSettings = new UserSettings();
     this.#userSettings.addEventListener('settingsUpdated', () => {
@@ -180,13 +180,30 @@ class Gui {
       this.#renderer, imageName, layer.scale, context));
   }
 
-  importSettings(parsedSettings) {
-    this.#renderer.clear();
+  importSettings(parsedSettings, clear) {
+    if (clear) {
+      this.#renderer.clear();
+    }
     parsedSettings.forEach((settings) => {
       this.addLayer(settings);
     });
     if (this.#renderer.layers.length == 0) {
       this.reset();
+    }
+  }
+
+  async #importLayerSettings(file) {
+    let file_reader = new FileReader();
+    let file_contents = new Promise((resolve) => {
+      file_reader.addEventListener('load', () => {
+        resolve(file_reader.result);
+      });
+    });
+    file_reader.readAsText(file);
+    try {
+      let parsedSettings = parseLayerSettings(await file_contents);
+      this.importSettings(parsedSettings, /*clear=*/false);
+    } catch (e) {
     }
   }
 
@@ -215,7 +232,15 @@ class Gui {
     let fileInput = document.getElementById('file');
     fileInput.addEventListener('change', async () => {
       let files = Array.from(fileInput.files);
-      files.sort((a, b) => {
+      let jsonFiles = files.filter((file) => {
+        return file.type == 'application/json';
+      });
+      for (let file of jsonFiles) {
+        await this.#importLayerSettings(file);
+      };
+      let imageFiles = files.filter((file) => {
+        return file.type == 'image/png';
+      }).toSorted((a, b) => {
         let priorityA = this.#userSettings.getFilePriority(a.name);
         let priorityB = this.#userSettings.getFilePriority(b.name);
         if (priorityA != priorityB) {
@@ -223,7 +248,7 @@ class Gui {
         }
         return a.name.localeCompare(b.name);
       });
-      for (let file of files) {
+      for (let file of imageFiles) {
         await this.loadFromFile(file);
       }
       fileInput.value = '';
