@@ -214,7 +214,16 @@ class Gui {
   setupHandlers() {
     let fileInput = document.getElementById('file');
     fileInput.addEventListener('change', async () => {
-      for (let file of fileInput.files) {
+      let files = Array.from(fileInput.files);
+      files.sort((a, b) => {
+        let priorityA = this.#userSettings.getFilePriority(a.name);
+        let priorityB = this.#userSettings.getFilePriority(b.name);
+        if (priorityA != priorityB) {
+          return priorityA - priorityB;
+        }
+        return a.name.localeCompare(b.name);
+      });
+      for (let file of files) {
         await this.loadFromFile(file);
       }
       fileInput.value = '';

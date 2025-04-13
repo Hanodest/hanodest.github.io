@@ -19,6 +19,7 @@ class ImageRule extends EventTarget {
   #blendMode;
   #drawMode;
   #ignore;
+  #priority;
 
   #container;
 
@@ -38,6 +39,7 @@ class ImageRule extends EventTarget {
     this.#drawMode.value = serialized.drawMode || 'sprite';
     this.#ignore = createInput(undefined, 'checkbox');
     this.#ignore.checked = serialized.ignore || false;
+    this.#priority = createInput(serialized.priority, 'number');
 
     let deleteButton = document.createElement('div');
     deleteButton.classList.add('delete-icon');
@@ -49,7 +51,7 @@ class ImageRule extends EventTarget {
     this.#container.classList.add('image-rule');
     [this.#filename, this.#suffixRegex, this.#columns, this.#rows,
     this.#scale, this.#blendMode, this.#drawMode,
-    this.#ignore, deleteButton].forEach(
+    this.#ignore, this.#priority, deleteButton].forEach(
       (input) => {
         let cell = document.createElement('div');
         cell.classList.add('image-rule-cell');
@@ -68,6 +70,7 @@ class ImageRule extends EventTarget {
       blendMode: this.#blendMode.value,
       drawMode: this.#drawMode.value,
       ignore: this.#ignore.checked,
+      priority: parseInt(this.#priority.value) || undefined,
     };
   }
 
@@ -134,7 +137,7 @@ class UserSettings extends EventTarget {
     this.#settingsTableHeader = document.createElement('div');
     this.#settingsTableHeader.classList.add('image-rule-header');
     ['Filename', 'Sheet number', 'Columns', 'Rows', 'Scale',
-      'Blend mode', 'Draw mode', 'Ignore'].forEach(
+      'Blend mode', 'Draw mode', 'Ignore', 'Priority'].forEach(
         (text) => {
           let columnHeader = document.createElement('div');
           columnHeader.classList.add('image-rule-header-cell');
@@ -239,6 +242,11 @@ class UserSettings extends EventTarget {
       }
     }
     return new ImageRule({});
+  }
+
+  getFilePriority(filename) {
+    let rule = this.getImageRule(filename);
+    return rule.serialized.priority || 0;
   }
 
   get invertLayerOrder() {
