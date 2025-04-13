@@ -62,9 +62,15 @@ class ExportUi {
     this.#luaTab.addEventListener('click', () => { this.#showLua(); });
     header.replaceChildren(this.#jsonTab, this.#luaTab);
 
+    let copyButton = document.createElement('div');
+    copyButton.classList.add('copy-icon', 'export-copy-button');
+    copyButton.addEventListener('click', () => {
+      navigator.clipboard.writeText(this.#text.value);
+    });
+
     this.#container = document.createElement('div');
     this.#container.classList.add('export-ui');
-    this.#container.replaceChildren(header, this.#text);
+    this.#container.replaceChildren(header, copyButton, this.#text);
 
     this.#overlay = new Overlay(this);
   }
