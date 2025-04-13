@@ -189,7 +189,7 @@ class Layer extends EventTarget {
 
     this.#lineLength = new NumberInput('Columns:', 1, 64, settings.lineLength);
     this.#lineLength.addEventListener('change', () => { this.#updateSize(); });
-    this.#linesPerFile = new NumberInput('Rows:', 1, 64, settings.lineLength);
+    this.#linesPerFile = new NumberInput('Rows:', 1, 64, settings.linesPerFile);
     this.#linesPerFile.addEventListener('change', () => { this.#updateSize(); });
     this.#frameCount = new NumberInput('Frames:', 1, 1024, settings.frameCount);
 
