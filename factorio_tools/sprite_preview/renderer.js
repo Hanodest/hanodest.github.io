@@ -61,8 +61,10 @@ class Renderer {
   }
 
   getRenderSize() {
-    let [topLeft, bottomRight] = this.#getBoundingBox();
-    return [bottomRight.x - topLeft.x, bottomRight.y - topLeft.y];
+    return [
+      this.#wasmRenderer.ccall('GetWidth', 'number', [], []),
+      this.#wasmRenderer.ccall('GetHeight', 'number', [], [])
+    ];
   }
 
   getFrameCount() {
@@ -80,9 +82,6 @@ class Renderer {
         [topLeft.x, topLeft.y, bottomRight.x, bottomRight.y]);
     }
     this.#wasmRenderer.ccall('SetBackground', 'undefined', ['string'], [backgroundName]);
-
-    let width = bottomRight.x - topLeft.x;
-    let height = bottomRight.y - topLeft.y;
 
     this.#layers.forEach((layer) => {
       if (layer.drawMode != 'shadow') {
@@ -128,6 +127,8 @@ class Renderer {
       getColorLookupTable(backgroundName, daytime),
       this.#wasmRenderer.ccall('GetNightLut', 'number', [], []))
 
+    let width = this.#wasmRenderer.ccall('GetWidth', 'number', [], []);
+    let height = this.#wasmRenderer.ccall('GetHeight', 'number', [], []);
     let data = new ImageData(width, height);
     let renderResult = this.#wasmRenderer.ccall('ApplyLight', 'number', [], []);
     data.data.set(this.#wasmRenderer.HEAPU8.slice(

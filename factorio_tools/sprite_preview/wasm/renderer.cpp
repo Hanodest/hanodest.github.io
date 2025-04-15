@@ -294,6 +294,9 @@ EMSCRIPTEN_KEEPALIVE void InitCanvas(int32_t x0, int32_t y0, //
   canvas.Reset(x0, y0, x1, y1);
 }
 
+EMSCRIPTEN_KEEPALIVE int32_t GetWidth() { return canvas.x1 - canvas.x0; }
+EMSCRIPTEN_KEEPALIVE int32_t GetHeight() { return canvas.y1 - canvas.y0; }
+
 EMSCRIPTEN_KEEPALIVE void SetBackground(char image_id[]) {
   if (const auto background_image = images.find(image_id);
       background_image != images.end()) {
@@ -319,7 +322,7 @@ DrawSprite(char image_id[], char blend_mode[], int32_t sx, int32_t sy,
   s_width -= (crop_left + crop_right);
   s_height -= (crop_top + crop_bottom);
   dx += crop_left;
-  dy += crop_left;
+  dy += crop_top;
   const Tint tint = {r, g, b, a};
   const std::string blend_mode_str = blend_mode;
   if (blend_mode_str == "normal") {
@@ -352,7 +355,7 @@ EMSCRIPTEN_KEEPALIVE void DrawLight(char image_id[], int32_t sx, int32_t sy,
   s_width -= (crop_left + crop_right);
   s_height -= (crop_top + crop_bottom);
   dx += crop_left;
-  dy += crop_left;
+  dy += crop_top;
   const Tint tint = {r, g, b, a};
   canvas.DrawLight(image, sx, sy, s_width, s_height, dx, dy, tint);
 }
@@ -372,7 +375,7 @@ EMSCRIPTEN_KEEPALIVE void DrawShadow(char image_id[], int32_t sx, int32_t sy,
   s_width -= (crop_left + crop_right);
   s_height -= (crop_top + crop_bottom);
   dx += crop_left;
-  dy += crop_left;
+  dy += crop_top;
   canvas.DrawShadow(image, sx, sy, s_width, s_height, dx, dy);
 }
 
