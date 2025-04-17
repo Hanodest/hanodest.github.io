@@ -72,7 +72,7 @@ class Layer extends EventTarget {
 
   constructor(settings, renderer) {
     super();
-    this.#hidden = false;
+    this.#hidden = settings.hidden || false;;
     this.#imageFiles = [];
     this.#renderer = renderer;
 
@@ -113,6 +113,7 @@ class Layer extends EventTarget {
 
     let hideButton = document.createElement('div');
     hideButton.classList.add('eye-icon');
+    hideButton.classList.toggle('layer-hidden', this.#hidden);
     hideButton.addEventListener('click', () => {
       this.#hidden = !this.#hidden;
       hideButton.classList.toggle('layer-hidden', this.#hidden);

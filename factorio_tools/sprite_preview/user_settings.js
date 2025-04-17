@@ -1,5 +1,6 @@
 import { createBlendSelect, createDrawSelect } from './layer.js';
 import { Overlay } from './overlay.js';
+import { ColorPicker } from './color_picker.js';
 
 function createInput(value, type) {
   let result = document.createElement('input');
@@ -11,6 +12,7 @@ function createInput(value, type) {
 class ImageRule extends EventTarget {
   #serialized;
 
+  #hidden;
   #filename;
   #suffixRegex;
   #columns;
@@ -18,6 +20,7 @@ class ImageRule extends EventTarget {
   #scale;
   #blendMode;
   #drawMode;
+  #tint;
   #ignore;
   #priority;
 
@@ -28,6 +31,14 @@ class ImageRule extends EventTarget {
 
     this.#serialized = serialized;
 
+    this.#hidden = serialized.hidden || false;
+    let hideButton = document.createElement('div');
+    hideButton.classList.add('eye-icon');
+    hideButton.classList.toggle('layer-hidden', this.#hidden);
+    hideButton.addEventListener('click', () => {
+      this.#hidden = !this.#hidden;
+      hideButton.classList.toggle('layer-hidden', this.#hidden);
+    });
     this.#filename = createInput(serialized.filename, 'text');
     this.#suffixRegex = createInput(serialized.suffixRegex, 'text');
     this.#columns = createInput(serialized.columns, 'number');
@@ -35,6 +46,7 @@ class ImageRule extends EventTarget {
     this.#scale = createInput(serialized.scale, 'number');
     this.#blendMode = createBlendSelect();
     this.#blendMode.value = serialized.blendMode || 'normal';
+    this.#tint = new ColorPicker(serialized.tint);
     this.#drawMode = createDrawSelect();
     this.#drawMode.value = serialized.drawMode || 'sprite';
     this.#ignore = createInput(undefined, 'checkbox');
@@ -53,8 +65,9 @@ class ImageRule extends EventTarget {
 
     this.#container = document.createElement('div');
     this.#container.classList.add('image-rule');
-    [dragTarget, this.#filename, this.#suffixRegex, this.#columns, this.#rows,
-      this.#scale, this.#blendMode, this.#drawMode,
+    [dragTarget, hideButton, this.#filename, this.#suffixRegex,
+      this.#columns, this.#rows,
+      this.#scale, this.#blendMode, this.#drawMode, this.#tint.container,
       this.#ignore, this.#priority, deleteButton].forEach(
         (input) => {
           let cell = document.createElement('div');
@@ -92,6 +105,7 @@ class ImageRule extends EventTarget {
 
   update() {
     this.#serialized = {
+      hidden: this.#hidden,
       filename: this.#filename.value,
       suffixRegex: this.#suffixRegex.value,
       columns: parseInt(this.#columns.value) || undefined,
@@ -99,6 +113,7 @@ class ImageRule extends EventTarget {
       scale: parseFloat(this.#scale.value) || undefined,
       blendMode: this.#blendMode.value,
       drawMode: this.#drawMode.value,
+      tint: this.#tint.value,
       ignore: this.#ignore.checked,
       priority: parseInt(this.#priority.value) || undefined,
     };
@@ -166,8 +181,8 @@ class UserSettings extends EventTarget {
 
     this.#settingsTableHeader = document.createElement('div');
     this.#settingsTableHeader.classList.add('image-rule-header');
-    ['', 'Filename', 'Sheet number', 'Columns', 'Rows', 'Scale',
-      'Blend mode', 'Draw mode', 'Ignore', 'Priority'].forEach(
+    ['', '', 'Filename', 'Sheet number', 'Columns', 'Rows', 'Scale',
+      'Blend mode', 'Draw mode', 'Color', 'Ignore', 'Priority'].forEach(
         (text) => {
           let columnHeader = document.createElement('div');
           columnHeader.classList.add('image-rule-header-cell');

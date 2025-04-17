@@ -16,6 +16,7 @@ function detectLayerSettings(imageName, imageRule, context) {
   let layerName = imageRule.getLayerName(imageName);
 
   return {
+    hidden: serializedRule.hidden || false,
     filename: layerName || imageName,
     filenames: [],
     size: new Vector(canvas.width / numColumns, canvas.height / numRows),
@@ -26,7 +27,7 @@ function detectLayerSettings(imageName, imageRule, context) {
     scale: serializedRule.scale || 0.5,
     blendMode: serializedRule.blendMode || 'normal',
     drawMode: serializedRule.drawMode || 'sprite',
-    tint: [255, 255, 255, 255],
+    tint: serializedRule.tint || [255, 255, 255, 255],
   };
 }
 
