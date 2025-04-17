@@ -15,10 +15,12 @@ class RawImage {
 public:
   RawImage(int32_t width, int32_t height)
       : width(width), height(height),
-        data(std::make_unique<uint8_t[]>(width * height * 4)) {}
+        data(std::make_unique<uint8_t[]>(width * height * 4)),
+        row_length(std::make_unique<int32_t[]>(height)) {}
 
   int32_t width, height;
   std::unique_ptr<uint8_t[]> data;
+  std::unique_ptr<int32_t[]> row_length;
 };
 
 struct Tint {
@@ -283,6 +285,27 @@ EMSCRIPTEN_KEEPALIVE void *CreateImage(char image_id[], //
   const auto iterator =
       images.insert_or_assign(image_id, std::make_unique<RawImage>(w, h)).first;
   return iterator->second->data.get();
+}
+
+EMSCRIPTEN_KEEPALIVE void CalculateRowLength(char image_id[]) {
+  RawImage &image = *images[image_id];
+  for (int32_t y = 0; y < image.height; y++) {
+    image.row_length[y] = 0;
+    for (int32_t x = image.width - 1; x >= 0; x--) {
+      if (image.data[(y * image.width + x) * 4 + 3] > 0) {
+        image.row_length[y] = x + 1;
+        break;
+      }
+    }
+  }
+  for (int32_t y = image.height - 2; y >= 0; y--) {
+    image.row_length[y] =
+        std::max(image.row_length[y], image.row_length[y + 1]);
+  }
+}
+
+EMSCRIPTEN_KEEPALIVE int32_t GetRowLength(char image_id[], int32_t row) {
+  return images[image_id]->row_length[row];
 }
 
 EMSCRIPTEN_KEEPALIVE void InitCanvas(int32_t x0, int32_t y0, //

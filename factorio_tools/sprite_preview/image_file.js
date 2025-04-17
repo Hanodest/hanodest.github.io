@@ -66,6 +66,19 @@ class ImageFile extends EventTarget {
     });
   }
 
+  numFrames(size) {
+    if (this.#imageId === undefined) {
+      return 0;
+    }
+    let numColumns = Math.floor(this.#imageSize.x / size.x);
+    let numRows = Math.floor(this.#imageSize.y / size.y);
+    if (numColumns == 0 || numRows == 0) {
+      return 0;
+    }
+    let lastRowLength = this.#renderer.getRowLength(this.#imageId, (numRows - 1) * size.y);
+    return (numRows - 1) * numColumns + Math.ceil(lastRowLength / size.x);
+  }
+
   static fromResolvedContext(renderer, filename, scale, context) {
     let result = new ImageFile(renderer, filename, scale);
     result.#container.classList.remove('missing-file');

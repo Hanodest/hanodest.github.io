@@ -275,13 +275,16 @@ class Layer extends EventTarget {
 
   #updateFrameCount() {
     let count = 0;
-    this.#imageFiles.forEach((image) => {
-      let size = image.size;
-      if (typeof (size) != 'undefined') {
-        count += Math.floor(size.y / this.#size.y);
+    this.#imageFiles.forEach((image, idx) => {
+      if (idx < this.#imageFiles.length - 1) {
+        if (image.imageId !== undefined) {
+          count += this.#lineLength.value * this.#linesPerFile.value;
+        }
+      } else {
+        count += image.numFrames(this.#size);
       }
     });
-    this.#frameCount.reset(count * this.#lineLength.value);
+    this.#frameCount.reset(count);
   }
 
   #getSpritesheetSize() {

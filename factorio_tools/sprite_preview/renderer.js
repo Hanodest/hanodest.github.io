@@ -49,6 +49,7 @@ class Renderer {
       'CreateImage', 'number', ['string', 'number', 'number'], [id, width, height]);
     this.#wasmRenderer.HEAPU8.set(context.getImageData(0, 0, width, height).data,
       imageMemory);
+    this.#wasmRenderer.ccall('CalculateRowLength', 'undefined', ['string'], [id]);
   }
 
   #getBoundingBox() {
@@ -65,6 +66,11 @@ class Renderer {
       this.#wasmRenderer.ccall('GetWidth', 'number', [], []),
       this.#wasmRenderer.ccall('GetHeight', 'number', [], [])
     ];
+  }
+
+  getRowLength(imageId, row) {
+    return this.#wasmRenderer.ccall(
+      'GetRowLength', 'number', ['string', 'number'], [imageId, row]);
   }
 
   getFrameCount() {
