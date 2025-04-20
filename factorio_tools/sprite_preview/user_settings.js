@@ -162,9 +162,11 @@ class UserSettings extends EventTarget {
       let serialized = JSON.parse(localStorage.getItem('sprite_preview_settings'));
       this.#restore(serialized);
     } catch (e) {
-      this.#imageRules = [];
-      this.#invertLayerOrder.checked = false;
-      this.#animationSpeed.value = 60;
+      this.#restore({
+        imageRules: [{}],
+        invertLayerOrder: false,
+        animationSpeed: 60
+      })
     }
 
     let invertLabel = document.createElement('div');
@@ -179,16 +181,7 @@ class UserSettings extends EventTarget {
     animationSpeedRow.classList.add('flex-horizontal', 'white');
     animationSpeedRow.replaceChildren(animationSpeedLabel, this.#animationSpeed);
 
-    this.#settingsTableHeader = document.createElement('div');
-    this.#settingsTableHeader.classList.add('image-rule-header');
-    ['', '', 'Filename', 'Sheet number', 'Columns', 'Rows', 'Scale',
-      'Blend mode', 'Draw mode', 'Color', 'Ignore', 'Priority'].forEach(
-        (text) => {
-          let columnHeader = document.createElement('div');
-          columnHeader.classList.add('image-rule-header-cell');
-          columnHeader.innerText = text;
-          this.#settingsTableHeader.appendChild(columnHeader);
-        });
+    this.#settingsTableHeader = document.getElementById('image_rule_header');
     let addRule = document.createElement('div');
     addRule.classList.add('add-icon');
     addRule.addEventListener('click', () => {
@@ -210,11 +203,10 @@ class UserSettings extends EventTarget {
     exportButton.addEventListener('click', () => { this.#exportSettings(); });
     importExport.replaceChildren(importButton, exportButton);
 
-    let header = document.getElementById('settings_header');
     this.#settingsTable = document.createElement('div');
     this.#container = document.createElement('div');
     this.#container.replaceChildren(
-      invertRow, animationSpeedRow, header, this.#settingsTable, importExport);
+      invertRow, animationSpeedRow, this.#settingsTable, importExport);
     this.#overlay = new Overlay(this);
     this.#overlay.addEventListener('close', () => {
       this.#saveSettings();
@@ -272,6 +264,9 @@ class UserSettings extends EventTarget {
   }
 
   #restore(serialized) {
+    if (!Array.isArray(serialized.imageRules) || serialized.imageRules.length == 0) {
+      serialized.imageRules = [{}];
+    }
     this.#imageRules = serialized.imageRules.map((serializedRule) => {
       let rule = new ImageRule(serializedRule);
       rule.addEventListener('delete', () => { this.#deleteRule(rule); });

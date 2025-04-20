@@ -296,6 +296,36 @@ input[type="number"] {
   background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAIGNIUk0AAHomAACAhAAA+gAAAIDoAAB1MAAA6mAAADqYAAAXcJy6UTwAAAAJcEhZcwAACxMAAAsTAQCanBgAAAAHdElNRQfpAx0AICy/EF05AAAANElEQVR42mMYxmDl6rUTgZibEgM2wQwh2wCKDAFppsgQhGaEIRQbQF8voGumfzTCNQ9/AAAuqWARkMs+BQAAACV0RVh0ZGF0ZTpjcmVhdGUAMjAyNS0wMy0yOVQwMDozMjowOCswMDowMEP8cdkAAAAldEVYdGRhdGU6bW9kaWZ5ADIwMjUtMDMtMjlUMDA6MzI6MDgrMDA6MDAyocllAAAAKHRFWHRkYXRlOnRpbWVzdGFtcAAyMDI1LTAzLTI5VDAwOjMyOjQ0KzAwOjAwJl6MNAAAAABJRU5ErkJggg==");
 }
 
+.tooltip {
+  width: 16px;
+  height: 16px;
+  position: relative;
+  display: inline-block;
+}
+
+.tooltip-icon {
+  background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAQAAAC1+jfqAAAAAXNSR0IB2cksfwAAAARnQU1BAACxjwv8YQUAAAAgY0hSTQAAeiYAAICEAAD6AAAAgOgAAHUwAADqYAAAOpgAABdwnLpRPAAAAAlwSFlzAAAJ1wAACdcBsW4XtwAAAAd0SU1FB+kEExcvGSWtmwMAAACMSURBVHjalZDBDYJAFESpANtw7ceL9KFiLEUlQaEfsQP6gOckm81E1oO+Oc7LzuYXf8CGmkapCXm5omcmMdNRftYvlgxYoScxKom7t/34WfFQiMIJMyrmGIUbZkeFuebCVjEXT+SCJwj+JJWSmFgXEbqvn2x9h5KBJc94KCsPPDTRurYUONAoe23/zht6CibUU+kUlAAAAABJRU5ErkJggg==");
+  background-size: 100%;
+  width: 16px;
+  height: 16px;
+}
+
+.tooltip-text {
+  border-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABEAAAARCAIAAAC0D9CtAAAAAXNSR0IB2cksfwAAAARnQU1BAACxjwv8YQUAAAAgY0hSTQAAeiYAAICEAAD6AAAAgOgAAHUwAADqYAAAOpgAABdwnLpRPAAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB+kEFBYbEpVA4/IAAAETSURBVHjaxZGDbgVRAETvs23bNoK6UW3bblh/e2e9Wzd6NyeaObMkWzPDN3vzj5ebr3e7b/d734EWDkz4ZLxdXJ8ePtucuT1cuj9eoVmVQoVo4cCET4pR/3CrNDvRX58Z25gb35iboJnkmADI0cKBCZ9E3fZkwFPJxNuVfKdaaINaUQwS5GjhwIRPAk5b2OOM+j3xYCAWCoJoKCSGCdHCgQmf33hj9Ib2wtEwRwhQM7RwxBsXteEGkTCIcAgzODDFGx+7kQwokHAb30A2/3+f/3+3//8fr83sc1j9Trvf7fS7XRQetwQ6RAsHJnxiM+osBp1JrzXqtAYK3VdQLRyY8Ileo1Iq5ORvByZ8opDLyH8O/HfDqnac7d4kJgAAAABJRU5ErkJggg==") 8/4px repeat;
+  position: absolute;
+  background-color: #1f1e1f;
+  padding: 4px;
+  bottom: 16px;
+  color: #ffffff;
+  max-width: 500px;
+  min-width: 300px;
+  display: none;
+}
+
+.tooltip:hover .tooltip-text {
+  display: block;
+}
+
 #layers_settings {
   display: flex;
   flex-direction: column;
@@ -467,15 +497,6 @@ textarea:focus {
   color: #ffe6c0;
 }
 
-.settings-header {
-  color: #ffffff;
-  max-width: 810px;
-  font-size: 12px;
-  margin: auto;
-}
-.settings-header a {
-  color: #ffffff;
-}
 .image-rule,
 .image-rule-header {
   display: table-row;

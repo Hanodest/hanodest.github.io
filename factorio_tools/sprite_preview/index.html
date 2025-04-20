@@ -1,8 +1,10 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en-US">
   <head>
     <meta charset="utf-8">
-    <title>Factorio sprite preview</title>
+    <title>
+      Factorio sprite preview
+    </title>
     <link rel="stylesheet" href="style.css">
     <script type="module">
       import {Gui} from './gui.js';
@@ -22,73 +24,135 @@
           <div id="global_controls" class="box-dark-inset hidden">
             <div class="range-line">
               <div>
-                <label for="animation_speed">Animation speed:</label>
+                <label for="animation_speed">Animation
+                speed:</label>
               </div>
               <div class="range-container">
-                <input id="animation_speed" type="range" min="1" max="120" value="60" />
+                <input id="animation_speed" type="range" min="1"
+                max="120" value="60">
               </div>
-              <div id="previous_button" class="previous-button"></div>
+              <div id="previous_button" class="previous-button">
+              </div>
               <div id="pause_button" class="pause-button"></div>
               <div id="next_button" class="next-button"></div>
             </div>
             <div class="range-line">
-              <div><label for="day_night">Daytime</label></div>
+              <div>
+                <label for="day_night">Daytime</label>
+              </div>
               <div class="range-container">
-                <input id="day_night" type="range" min="0" max="255" value="0" />
+                <input id="day_night" type="range" min="0" max=
+                "255" value="0">
               </div>
             </div>
             <div class="range-line">
-              <div><label for="background">Background</label></div>
+              <div>
+                <label for="background">Background</label>
+              </div>
               <div>
                 <select id="background">
-                  <option label="Lab tiles" value="lab"></option>
-                  <option label="Nauvis" value="nauvis"></option>
-                  <option label="Vulcanus" value="vulcanus"></option>
-                  <option label="Fulgora" value="fulgora"></option>
-                  <option label="Gleba" value="gleba"></option>
-                  <option label="Aquilo" value="aquilo"></option>
+                  <option label="Lab tiles" value="lab">
+                  </option>
+                  <option label="Nauvis" value="nauvis">
+                  </option>
+                  <option label="Vulcanus" value="vulcanus">
+                  </option>
+                  <option label="Fulgora" value="fulgora">
+                  </option>
+                  <option label="Gleba" value="gleba">
+                  </option>
+                  <option label="Aquilo" value="aquilo">
+                  </option>
                 </select>
               </div>
             </div>
           </div>
-          <div id="layers_settings">
-          </div>
+          <div id="layers_settings"></div>
           <div class="right-aligned">
-            <input type="file" id="file" accept="image/png, application/json" class="hidden" multiple>
-            <div id="download_button" class="download-icon hidden"></div>
-            <div id="download_progress" class="download-progress hidden"></div>
+            <input type="file" id="file" accept=
+            "image/png, application/json" class="hidden" multiple>
+            <div id="download_button" class="download-icon hidden">
+            </div>
+            <div id="download_progress" class=
+            "download-progress hidden"></div>
             <div id="import_settings" class="import-icon"></div>
             <div id="export_settings" class="export-icon"></div>
-            <div id="add_layer" class="box-light text-button">+ Add spritesheets</div>
+            <div id="add_layer" class="box-light text-button">
+              + Add spritesheets
+            </div>
           </div>
         </div>
       </div>
     </div>
     <div style="display:none">
       <div id="import_header" class="import-header">
-        Accepted input: well-formed JSON of
-        <a href="https://lua-api.factorio.com/latest/prototypes/AnimationPrototype.html">
-          AnimationPrototype
-        </a>.
-        It can be obtained from the export function of this tool,
-        from a dump produced by running
-        <a href="https://wiki.factorio.com/Command_line_parameters">factorio --dump-data</a>,
-        from <a href="https://raw.tools.bpbin.com/">data.raw explorer</a>,
-        or any other methods.
+        Accepted input: well-formed JSON of <a href=
+        "https://lua-api.factorio.com/latest/prototypes/AnimationPrototype.html">
+        AnimationPrototype</a> . It can be obtained from the export
+        function of this tool, from a dump produced by running
+        <a href=
+        "https://wiki.factorio.com/Command_line_parameters">factorio
+        --dump-data</a>, from <a href=
+        "https://raw.tools.bpbin.com/">data.raw explorer</a>, or
+        any other methods.
       </div>
-      <div id="settings_header" class="settings-header">
-        The table below allows configuring default parameters used for added spritesheets
-        based on their name. The first preset that has <i>filename</i> column matching
-        the name of the added spritesheet will be applied. <i>Filename</i> can be any valid
-        <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Regular_expressions">RegExp</a>.
-        Empty <i>filename</i> column would match all files.
-        <br>
-        <i>Sheet number</i> is a RegExp, that, if not empty, will remove the matching
-        part of the file name, and all the uploaded spritesheets that have the same remaning
-        part will be grouped together.
-        <br>
-        The other columns have default parameters used for the added spritesheet.
-        If any of the dimensions is left empty, it will be automatically detected instead.
+      <div class="image-rule-header" id="image_rule_header">
+        <div class="image-rule-header-cell"></div>
+        <div class="image-rule-header-cell"></div>
+        <div class="image-rule-header-cell">
+          Filename
+          <div class="tooltip">
+            <div class="tooltip-icon"></div>
+            <div class="tooltip-text">
+              RegExp that will be matched against the names of all
+              added spritesheets. If empty, will match <b>all</b>
+              uploaded files.
+            </div>
+          </div>
+        </div>
+        <div class="image-rule-header-cell">
+          Sheet number
+          <div class="tooltip">
+            <div class="tooltip-icon"></div>
+            <div class="tooltip-text">
+              RegExp matching a part of the file name. Spritesheets
+              that have the same name if the matched part is
+              ignored will be grouped into the same layer.
+            </div>
+          </div>
+        </div>
+        <div class="image-rule-header-cell">
+          Columns
+        </div>
+        <div class="image-rule-header-cell">
+          Rows
+        </div>
+        <div class="image-rule-header-cell">
+          Scale
+        </div>
+        <div class="image-rule-header-cell">
+          Blend mode
+        </div>
+        <div class="image-rule-header-cell">
+          Draw mode
+        </div>
+        <div class="image-rule-header-cell">
+          Color
+        </div>
+        <div class="image-rule-header-cell">
+          Ignore
+        </div>
+        <div class="image-rule-header-cell">
+          Priority
+          <div class="tooltip">
+            <div class="tooltip-icon"></div>
+            <div class="tooltip-text">
+              When multiple spritesheet are selected at once, this
+              priority determines the order of layers they will be
+              put in.
+            </div>
+          </div>
+        </div>
       </div>
     </div>
     <div id="user_settings" class="user-settings-icon"></div>
