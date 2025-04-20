@@ -70,6 +70,17 @@ class Gui {
         ]);
       });
     });
+    this.#canvas.addEventListener('dragover', (event) => {
+      event.preventDefault();
+    });
+    this.#canvas.addEventListener('drop', async (event) => {
+      event.preventDefault();
+      await this.#loadFiles(Array.from(event.dataTransfer.items).map(
+        (item) => {
+          return item.getAsFile();
+        }));
+    });
+
     this.#context = this.#canvas.getContext('2d', { willReadFrequently: true });
 
     this.#exportUi = new ExportUi();
@@ -228,29 +239,32 @@ class Gui {
     this.loadImage(filename, imageRule, await loadImageFromFile(file));
   }
 
+  async #loadFiles(files) {
+    let jsonFiles = files.filter((file) => {
+      return file.type == 'application/json';
+    });
+    for (let file of jsonFiles) {
+      await this.#importLayerSettings(file);
+    };
+    let imageFiles = files.filter((file) => {
+      return file.type == 'image/png';
+    }).toSorted((a, b) => {
+      let priorityA = this.#userSettings.getFilePriority(a.name);
+      let priorityB = this.#userSettings.getFilePriority(b.name);
+      if (priorityA != priorityB) {
+        return priorityA - priorityB;
+      }
+      return a.name.localeCompare(b.name);
+    });
+    for (let file of imageFiles) {
+      await this.loadFromFile(file);
+    }
+  }
+
   setupHandlers() {
     let fileInput = document.getElementById('file');
     fileInput.addEventListener('change', async () => {
-      let files = Array.from(fileInput.files);
-      let jsonFiles = files.filter((file) => {
-        return file.type == 'application/json';
-      });
-      for (let file of jsonFiles) {
-        await this.#importLayerSettings(file);
-      };
-      let imageFiles = files.filter((file) => {
-        return file.type == 'image/png';
-      }).toSorted((a, b) => {
-        let priorityA = this.#userSettings.getFilePriority(a.name);
-        let priorityB = this.#userSettings.getFilePriority(b.name);
-        if (priorityA != priorityB) {
-          return priorityA - priorityB;
-        }
-        return a.name.localeCompare(b.name);
-      });
-      for (let file of imageFiles) {
-        await this.loadFromFile(file);
-      }
+      await this.#loadFiles(Array.from(fileInput.files));
       fileInput.value = '';
     });
     document.getElementById('add_layer').addEventListener('click', () => {
