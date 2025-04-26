@@ -137,7 +137,7 @@ class Layer extends EventTarget {
     fileListContainer.classList.add('inner-collapsed');
 
     let fileListBar = document.createElement('div');
-    fileListBar.classList.add('right-aligned');
+    fileListBar.classList.add('right-aligned', 'file-list-bar');
     let fileCollapseButton = document.createElement('div');
     fileCollapseButton.classList.add('collapse-icon');
     fileCollapseButton.addEventListener('click', () => {
@@ -145,6 +145,7 @@ class Layer extends EventTarget {
     });
     this.#fileListTitle = document.createElement('div');
     this.#fileListTitle.innerText = 'Spritesheets: 0';
+    this.#fileListTitle.classList.add('sheet-count');
     let addSpritesheetsInput = document.createElement('input');
     addSpritesheetsInput.type = 'file';
     addSpritesheetsInput.accept = 'image/*';

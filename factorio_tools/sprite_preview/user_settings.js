@@ -63,14 +63,14 @@ class ImageRule extends EventTarget {
     dragTarget.classList.add('drag-block-small');
     dragTarget.draggable = true;
 
-    this.#container = document.createElement('div');
+    this.#container = document.createElement('tr');
     this.#container.classList.add('image-rule');
     [dragTarget, hideButton, this.#filename, this.#suffixRegex,
       this.#columns, this.#rows,
       this.#scale, this.#blendMode, this.#drawMode, this.#tint.container,
       this.#ignore, this.#priority, deleteButton].forEach(
         (input) => {
-          let cell = document.createElement('div');
+          let cell = document.createElement('td');
           cell.classList.add('image-rule-cell');
           cell.appendChild(input);
           this.#container.appendChild(cell);
@@ -171,12 +171,14 @@ class UserSettings extends EventTarget {
 
     let invertLabel = document.createElement('div');
     invertLabel.innerText = 'Invert order of layers';
+    invertLabel.classList.add('number-input-caption');
     let invertRow = document.createElement('div');
     invertRow.classList.add('flex-horizontal', 'white');
-    invertRow.replaceChildren(this.#invertLayerOrder, invertLabel);
+    invertRow.replaceChildren(invertLabel, this.#invertLayerOrder);
 
     let animationSpeedLabel = document.createElement('div');
     animationSpeedLabel.innerText = 'Default animation speed (fps):';
+    animationSpeedLabel.classList.add('number-input-caption');
     let animationSpeedRow = document.createElement('div');
     animationSpeedRow.classList.add('flex-horizontal', 'white');
     animationSpeedRow.replaceChildren(animationSpeedLabel, this.#animationSpeed);
@@ -203,7 +205,7 @@ class UserSettings extends EventTarget {
     exportButton.addEventListener('click', () => { this.#exportSettings(); });
     importExport.replaceChildren(importButton, exportButton);
 
-    this.#settingsTable = document.createElement('div');
+    this.#settingsTable = document.createElement('table');
     this.#container = document.createElement('div');
     this.#container.replaceChildren(
       invertRow, animationSpeedRow, this.#settingsTable, importExport);
