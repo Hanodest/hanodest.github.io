@@ -1,0 +1,1562 @@
+{
+  "noise-function": {
+    "lerp": {
+      "type": "noise-function",
+      "name": "lerp",
+      "parameters": [
+        "a",
+        "b",
+        "alpha"
+      ],
+      "expression": "a + (b - a) * alpha"
+    },
+    "slider_to_linear": {
+      "type": "noise-function",
+      "name": "slider_to_linear",
+      "parameters": [
+        "slider_value",
+        "min",
+        "max"
+      ],
+      "expression": "min + 0.5 * (max - min) * (1 + log2(slider_value) / log2(6))"
+    },
+    "slider_rescale": {
+      "type": "noise-function",
+      "name": "slider_rescale",
+      "parameters": [
+        "slider_value",
+        "n"
+      ],
+      "expression": "2^(log2(slider_value)/log2(6)*log2(n))"
+    },
+    "spot_at_angle": {
+      "type": "noise-function",
+      "name": "spot_at_angle",
+      "parameters": [
+        "angle",
+        "distance",
+        "radius",
+        "x_distortion",
+        "y_distortion"
+      ],
+      "expression": "1 - (delta_x * delta_x + delta_y * delta_y) ^ 0.5 / radius",
+      "local_expressions": {
+        "angle_rad": "angle / 180 * pi",
+        "delta_x": "distance * sin(angle_rad) - x + x_distortion",
+        "delta_y": "-distance * cos(angle_rad) - y + y_distortion"
+      }
+    },
+    "starting_spot_at_angle": {
+      "type": "noise-function",
+      "name": "starting_spot_at_angle",
+      "parameters": [
+        "angle",
+        "distance",
+        "radius",
+        "x_distortion",
+        "y_distortion"
+      ],
+      "expression": "1 - (delta_x * delta_x + delta_y * delta_y) ^ 0.5 / radius",
+      "local_expressions": {
+        "angle_rad": "angle / 180 * pi",
+        "delta_x": "distance * sin(angle_rad) - x_from_start + x_distortion",
+        "delta_y": "-distance * cos(angle_rad) - y_from_start + y_distortion"
+      }
+    },
+    "rotate_x": {
+      "type": "noise-function",
+      "name": "rotate_x",
+      "parameters": [
+        "x",
+        "y",
+        "angle"
+      ],
+      "expression": "x * cos(angle_rad) + y * sin(angle_rad)",
+      "local_expressions": {
+        "angle_rad": "angle / 180 * pi"
+      }
+    },
+    "rotate_y": {
+      "type": "noise-function",
+      "name": "rotate_y",
+      "parameters": [
+        "x",
+        "y",
+        "angle"
+      ],
+      "expression": "y * cos(angle_rad) - x * sin(angle_rad)",
+      "local_expressions": {
+        "angle_rad": "angle / 180 * pi"
+      }
+    },
+    "noise_layer_noise": {
+      "type": "noise-function",
+      "name": "noise_layer_noise",
+      "parameters": [
+        "seed"
+      ],
+      "expression": "multioctave_noise{x = x, y = y, persistence = 0.7, seed0 = map_seed, seed1 = seed, octaves = 4, input_scale = 1/6, output_scale = 2/3}"
+    },
+    "random": {
+      "type": "noise-function",
+      "name": "random",
+      "parameters": [
+        "amplitude",
+        "seed"
+      ],
+      "expression": "1 - random_penalty{x = x, y = y, seed = seed, source = 1, amplitude = amplitude}"
+    },
+    "random_penalty_at": {
+      "type": "noise-function",
+      "name": "random_penalty_at",
+      "parameters": [
+        "value",
+        "seed"
+      ],
+      "expression": "random_penalty{x = x, y = y, seed = seed, source = value, amplitude = value}"
+    },
+    "random_penalty_between": {
+      "type": "noise-function",
+      "name": "random_penalty_between",
+      "parameters": [
+        "from",
+        "to",
+        "seed"
+      ],
+      "expression": "random_penalty{x = x, y = y, seed = seed, source = to, amplitude = to - from}"
+    },
+    "random_penalty_inverse": {
+      "type": "noise-function",
+      "name": "random_penalty_inverse",
+      "parameters": [
+        "penalty",
+        "seed"
+      ],
+      "expression": "random_penalty{x = x, y = y, seed = seed, source = 1, amplitude = 1 / penalty}"
+    },
+    "range_select": {
+      "type": "noise-function",
+      "name": "range_select",
+      "parameters": [
+        "input",
+        "from",
+        "to",
+        "slope",
+        "min",
+        "max"
+      ],
+      "expression": "clamp(min(input - (from - slope), to + slope - input) / slope, min, max)"
+    },
+    "range_select_base": {
+      "type": "noise-function",
+      "name": "range_select_base",
+      "parameters": [
+        "input",
+        "from",
+        "to",
+        "slope",
+        "min",
+        "max"
+      ],
+      "expression": "clamp(min(input - from, to - input) / slope, min, max)"
+    },
+    "asymmetric_ramps": {
+      "type": "noise-function",
+      "name": "asymmetric_ramps",
+      "parameters": [
+        "input",
+        "from_bottom",
+        "from_top",
+        "to_top",
+        "to_bottom"
+      ],
+      "expression": "min((input - from_top) / (from_top - from_bottom), (to_top - input) / (to_bottom - to_top))"
+    },
+    "place_every_n": {
+      "type": "noise-function",
+      "name": "place_every_n",
+      "parameters": [
+        "x_spacing",
+        "y_spacing",
+        "x_offset",
+        "y_offset"
+      ],
+      "expression": "min(((o_x + o_y * 0.93819) / 1.41983 % x_spacing) <= 1,((o_x / 4.1875839 - o_y) * 0.913853883 % y_spacing) <= 1)",
+      "local_expressions": {
+        "o_x": "x + x_offset",
+        "o_y": "y + y_offset"
+      }
+    },
+    "quick_multioctave_noise_persistence": {
+      "type": "noise-function",
+      "name": "quick_multioctave_noise_persistence",
+      "parameters": [
+        "x",
+        "y",
+        "seed0",
+        "seed1",
+        "input_scale",
+        "output_scale",
+        "octaves",
+        "octave_input_scale_multiplier",
+        "persistence"
+      ],
+      "expression": "quick_multioctave_noise{x = x,y = y,seed0 = seed0,seed1 = seed1,input_scale = input_scale * octave_input_scale_multiplier ^ (octaves - 1),output_scale = output_scale * 2 ^ (octaves - 1),octaves = octaves,octave_output_scale_multiplier = persistence,octave_input_scale_multiplier = 1 / octave_input_scale_multiplier}"
+    },
+    "amplitude_corrected_multioctave_noise": {
+      "type": "noise-function",
+      "name": "amplitude_corrected_multioctave_noise",
+      "parameters": [
+        "x",
+        "y",
+        "seed0",
+        "seed1",
+        "input_scale",
+        "offset_x",
+        "octaves",
+        "persistence",
+        "amplitude"
+      ],
+      "expression": "variable_persistence_multioctave_noise{x = x,y = y,seed0 = seed0,seed1 = seed1,input_scale = input_scale,output_scale = (1 - persistence) / 2 ^ octaves / (1 - persistence ^ octaves) * amplitude,offset_x = offset_x,octaves = octaves,persistence = persistence}"
+    },
+    "resource_autoplace_all_patches": {
+      "type": "noise-function",
+      "name": "resource_autoplace_all_patches",
+      "parameters": [
+        "base_density",
+        "base_spots_per_km2",
+        "candidate_spot_count",
+        "frequency_multiplier",
+        "has_starting_area_placement",
+        "random_spot_size_minimum",
+        "random_spot_size_maximum",
+        "regular_blob_amplitude_multiplier",
+        "regular_patch_set_count",
+        "regular_patch_set_index",
+        "regular_rq_factor",
+        "seed1",
+        "size_multiplier",
+        "starting_blob_amplitude_multiplier",
+        "starting_patch_set_count",
+        "starting_patch_set_index",
+        "starting_rq_factor"
+      ],
+      "expression": "if(has_starting_area_placement == 1, max(starting_patches, regular_patches), regular_patches)",
+      "local_expressions": {
+        "basement_value": "-6 * max(regular_blob_amplitude_at(regular_blob_amplitude_maximum_distance), starting_blob_amplitude)",
+        "blobs0": "basis_noise{x = x, y = y, seed0 = map_seed, seed1 = seed1, input_scale = 1/8, output_scale = 1} + basis_noise{x = x, y = y, seed0 = map_seed, seed1 = seed1, input_scale = 1/24, output_scale = 1}",
+        "double_density_distance": 1300,
+        "regular_patch_fade_in_distance": 300,
+        "starting_resource_placement_radius": 120,
+        "starting_patches_split": 0.5,
+        "starting_patches": "spot_noise{x = x,y = y,density_expression = starting_amount / (pi * starting_resource_placement_radius * starting_resource_placement_radius) * starting_modulation,spot_quantity_expression = starting_area_spot_quantity,spot_radius_expression = starting_rq_factor * starting_area_spot_quantity ^ (1/3),spot_favorability_expression = clamp((elevation_lakes - 1) / 10, 0, 1) * starting_modulation * 2 - distance / starting_resource_placement_radius + random_penalty_at(0.5, 1),seed0 = map_seed,seed1 = seed1 + 1,skip_span = starting_patch_set_count,skip_offset = starting_patch_set_index,region_size = starting_resource_placement_radius * 2,candidate_spot_count = 32,suggested_minimum_candidate_point_spacing = 32,hard_region_target_quantity = 1,basement_value = basement_value,maximum_spot_basement_radius = 128} + (blobs0 - 0.25) * starting_blob_amplitude",
+        "starting_amount": "20000 * base_density * (frequency_multiplier + 1) * size_multiplier",
+        "starting_area_spot_quantity": "starting_amount / starting_patches_split / frequency_multiplier",
+        "starting_blob_amplitude": "starting_blob_amplitude_multiplier / (pi/3 * starting_rq_factor ^ 2) * starting_area_spot_quantity ^ (1/3)",
+        "starting_modulation": "starting_resource_placement_radius > distance",
+        "regular_patches": "spot_noise{x = x,y = y,density_expression = regular_density_at(distance),spot_quantity_expression = regular_spot_quantity_expression,spot_radius_expression = min(32, regular_rq_factor * regular_spot_quantity_expression ^ (1/3)),spot_favorability_expression = 1,seed0 = map_seed,seed1 = seed1,region_size = 1024,candidate_spot_count = candidate_spot_count,suggested_minimum_candidate_point_spacing = 45.254833995939045,skip_span = regular_patch_set_count,skip_offset = regular_patch_set_index,hard_region_target_quantity = 0,basement_value = basement_value,maximum_spot_basement_radius = 128} + (blobs0 + basis_noise{x = x, y = y, seed0 = map_seed, seed1 = seed1, input_scale = 1/64, output_scale = 1.5} - 1/3) * regular_blob_amplitude_at(distance)",
+        "regular_blob_amplitude_maximum_distance": "if(has_starting_area_placement == -1,double_density_distance,double_density_distance + regular_patch_fade_in_distance)",
+        "regular_spot_quantity_expression": "random_penalty_between(random_spot_size_minimum, random_spot_size_maximum, 1) * regular_spot_quantity_base_at(distance)"
+      },
+      "local_functions": {
+        "size_effective_distance_at": {
+          "parameters": [
+            "distance"
+          ],
+          "expression": "if(has_starting_area_placement == -1, distance, distance - regular_patch_fade_in_distance)"
+        },
+        "regular_density_at": {
+          "parameters": [
+            "distance"
+          ],
+          "expression": "base_density * frequency_multiplier * size_multiplier * if(has_starting_area_placement == -1, 1, clamp((distance - starting_resource_placement_radius) / regular_patch_fade_in_distance, 0, 1)) * (1 + clamp(size_effective_distance_at(distance) / double_density_distance, 0, 1))"
+        },
+        "regular_spot_quantity_base_at": {
+          "parameters": [
+            "distance"
+          ],
+          "expression": "1000000 / base_spots_per_km2 / frequency_multiplier * regular_density_at(distance)"
+        },
+        "regular_spot_height_typical_at": {
+          "parameters": [
+            "distance"
+          ],
+          "expression": "((random_spot_size_minimum + random_spot_size_maximum) / 2 * regular_spot_quantity_base_at(distance)) ^ (1/3) / (pi/3 * regular_rq_factor ^ 2)"
+        },
+        "regular_blob_amplitude_at": {
+          "parameters": [
+            "distance"
+          ],
+          "expression": "regular_blob_amplitude_multiplier * min(regular_spot_height_typical_at(regular_blob_amplitude_maximum_distance),regular_spot_height_typical_at(distance))"
+        }
+      }
+    },
+    "make_0_12like_lakes": {
+      "type": "noise-function",
+      "name": "make_0_12like_lakes",
+      "parameters": [
+        "x",
+        "y",
+        "bias",
+        "terrain_octaves",
+        "segmentation_multiplier"
+      ],
+      "expression": "max(bias + variable_persistence_multioctave_noise{x = x,y = y,seed0 = map_seed,seed1 = 1,input_scale = input_scale,output_scale = 0.125,offset_x = offset_x,octaves = terrain_octaves,persistence = persistence},20 + water_level - 0.1 * segmentation_multiplier * distance + variable_persistence_multioctave_noise{x = x,y = y,seed0 = map_seed,seed1 = 2,input_scale = input_scale,output_scale = 0.125,offset_x = offset_x,octaves = 6,persistence = persistence})",
+      "local_expressions": {
+        "input_scale": "segmentation_multiplier / 2",
+        "offset_x": "10000 / segmentation_multiplier",
+        "persistence": "clamp(amplitude_corrected_multioctave_noise{x = x,y = y,seed0 = map_seed,seed1 = 1,octaves = terrain_octaves - 2,input_scale = input_scale,offset_x = offset_x,persistence = 0.7,amplitude = 0.5} + 0.3,0.1, 0.9)"
+      }
+    },
+    "finish_elevation": {
+      "type": "noise-function",
+      "name": "finish_elevation",
+      "parameters": [
+        "elevation",
+        "segmentation_multiplier"
+      ],
+      "expression": "min((elevation - water_level) / segmentation_multiplier,basis_noise{x = x, y = y, seed0 = map_seed, seed1 = 123, input_scale = 1/8, output_scale = 1.5} + starting_lake_distance / 4 - 4,-1 + (starting_lake_distance + starting_lake_noise) / 16,max(2, 2 + starting_lake_distance / 16 + starting_lake_noise / 2))",
+      "local_expressions": {
+        "starting_lake_distance": "distance_from_nearest_point{x = x, y = y, points = starting_lake_positions, maximum_distance = 1024}",
+        "starting_lake_noise": "quick_multioctave_noise_persistence{x = x,y = y,seed0 = map_seed,seed1 = 14,input_scale = 1/8,output_scale = 1,octaves = 5,octave_input_scale_multiplier = 0.5,persistence = 0.75}"
+      }
+    },
+    "elevation_nauvis_function": {
+      "type": "noise-function",
+      "name": "elevation_nauvis_function",
+      "expression": "min(wlc_elevation, starting_lake)",
+      "parameters": [
+        "added_cliff_elevation"
+      ],
+      "local_expressions": {
+        "elevation_magnitude": 20,
+        "wlc_amplitude": 2,
+        "wlc_elevation": "max(nauvis_main - water_level * wlc_amplitude, starting_island)",
+        "nauvis_main": "elevation_magnitude * (lerp(0.5 * added_cliff_elevation - 0.6,1.9 * added_cliff_elevation + 1.6,0.1 + 0.5 * nauvis_bridges)+ 0.25 * nauvis_detail+ 3 * nauvis_macro * starting_macro_multiplier)",
+        "starting_island": "nauvis_main + elevation_magnitude * (2.5 - distance * segmentation_multiplier / 200)",
+        "starting_macro_multiplier": "clamp(distance * nauvis_segmentation_multiplier / 2000, 0, 1)",
+        "starting_lake": "elevation_magnitude * (-3 + (starting_lake_distance + starting_lake_noise) / 8) / 8",
+        "starting_lake_distance": "distance_from_nearest_point{x = x, y = y, points = starting_lake_positions, maximum_distance = 1024}",
+        "starting_lake_noise": "quick_multioctave_noise_persistence{x = x,y = y,seed0 = map_seed,seed1 = 14,input_scale = 1/8,output_scale = 0.8,octaves = 4,octave_input_scale_multiplier = 0.5,persistence = 0.68}"
+      }
+    },
+    "normalize": {
+      "type": "noise-function",
+      "name": "normalize",
+      "parameters": [
+        "primary",
+        "secondary",
+        "bias"
+      ],
+      "expression": "primary / sqrt(bias + (primary*primary)+(secondary*secondary))"
+    },
+    "enemy_autoplace_base": {
+      "type": "noise-function",
+      "name": "enemy_autoplace_base",
+      "parameters": [
+        "distance_factor",
+        "seed"
+      ],
+      "expression": "random_penalty{x = x + seed,y = y,source = min(enemy_base_probability * max(0, 1 + 0.002 * distance_factor * (-312 * distance_factor - starting_area_radius + distance)),0.25 + distance_factor * 0.05),amplitude = 0.1}"
+    },
+    "expression_in_range_base": {
+      "type": "noise-function",
+      "name": "expression_in_range_base",
+      "parameters": [
+        "aux_from",
+        "moisture_from",
+        "aux_to",
+        "moisture_to"
+      ],
+      "expression": "expression_in_range(20, 1, aux, moisture, aux_from, moisture_from, aux_to, moisture_to)"
+    },
+    "water_base": {
+      "type": "noise-function",
+      "name": "water_base",
+      "parameters": [
+        "max_elevation",
+        "influence"
+      ],
+      "expression": "if(max_elevation >= elevation, influence * min(max_elevation - elevation, 1), -inf)"
+    },
+    "rpi": {
+      "type": "noise-function",
+      "name": "rpi",
+      "parameters": [
+        "survival"
+      ],
+      "expression": "random_penalty{x = x, y = y, source = 1, amplitude = 1/survival} - 1"
+    },
+    "decorative_mix_noise": {
+      "type": "noise-function",
+      "name": "decorative_mix_noise",
+      "parameters": [
+        "seed",
+        "input_scale"
+      ],
+      "expression": "-0.25+ abs(multioctave_noise{x = x, y = y, persistence = 0.65, seed0 = map_seed, seed1 = seed + 500, octaves = 2, input_scale = input_scale, output_scale = 0.8, offset_y = seed})+ basis_noise{x = x, y = y, seed0 = map_seed, seed1 = seed, input_scale = input_scale, output_scale = 0.1, offset_x = seed}+ basis_noise{x = x, y = y, seed0 = map_seed, seed1 = seed, input_scale = input_scale / 2, output_scale = 0.15, offset_x = seed}+ basis_noise{x = x, y = y, seed0 = map_seed, seed1 = seed, input_scale = input_scale / 4, output_scale = 0.2, offset_x = seed}"
+    }
+  },
+  "noise-expression": {
+    "temperature": {
+      "type": "noise-expression",
+      "name": "temperature",
+      "expression": "temperature_basic",
+      "localised_name": [
+        "noise-expression.temperature_basic"
+      ]
+    },
+    "temperature_basic": {
+      "type": "noise-expression",
+      "name": "temperature_basic",
+      "expression": "clamp(sea_level_temperature + var('control:temperature:bias') + quick_multioctave_noise{x = x,y = y,seed0 = map_seed,seed1 = 5,octaves = 4,input_scale = var('control:temperature:frequency') / 32,output_scale = 1/20,offset_x = 40000 / var('control:temperature:frequency'),octave_output_scale_multiplier = 3,octave_input_scale_multiplier = 1/3},-20, 50)",
+      "local_expressions": {
+        "sea_level_temperature": 15
+      }
+    },
+    "moisture": {
+      "type": "noise-expression",
+      "name": "moisture",
+      "expression": "moisture_nauvis",
+      "localised_name": [
+        "noise-expression.moisture_nauvis"
+      ]
+    },
+    "moisture_noise": {
+      "type": "noise-expression",
+      "name": "moisture_noise",
+      "expression": "quick_multioctave_noise{x = x,y = y,seed0 = map_seed,seed1 = 6,octaves = 4,input_scale = var('control:moisture:frequency') / 256,output_scale = 0.125,offset_x = 30000 / var('control:moisture:frequency'),octave_output_scale_multiplier = 1.5,octave_input_scale_multiplier = 1/3}"
+    },
+    "moisture_basic": {
+      "type": "noise-expression",
+      "name": "moisture_basic",
+      "expression": "clamp(0.45 + moisture_adjusted_bias + moisture_noise, 0, 1)"
+    },
+    "moisture_adjusted_bias": {
+      "type": "noise-expression",
+      "name": "moisture_adjusted_bias",
+      "expression": "lerp(base_bias, starting_bias, starting_bias_region)",
+      "local_expressions": {
+        "base_bias": "var('control:moisture:bias')",
+        "starting_bias": "lerp(base_bias, starting_bias_change, starting_bias_magnitude * 1.1)",
+        "starting_bias_change": "slider_to_linear(var('control:starting_area_moisture:size'), -0.5, 0.5)",
+        "starting_bias_magnitude": "abs(2 * starting_bias_change)",
+        "starting_bias_region": "clamp(2 - var('control:starting_area_moisture:frequency') / 400 * distance, 0, 1)"
+      }
+    },
+    "moisture_nauvis": {
+      "type": "noise-expression",
+      "name": "moisture_nauvis",
+      "expression": "max(min(moisture_main, 0.45), moisture_main - 0.2 * max(0, 1 - trees_forest_path_cutout * 1.5))",
+      "local_expressions": {
+        "moisture_main": "clamp(0.4 + moisture_adjusted_bias + moisture_noise- 0.08 * (nauvis_plateaus - 0.6),0, 1)"
+      }
+    },
+    "aux": {
+      "type": "noise-expression",
+      "name": "aux",
+      "expression": "aux_nauvis",
+      "localised_name": [
+        "noise-expression.aux_nauvis"
+      ]
+    },
+    "aux_noise": {
+      "type": "noise-expression",
+      "name": "aux_noise",
+      "expression": "quick_multioctave_noise{x = x,y = y,seed0 = map_seed,seed1 = 7,octaves = 4,input_scale = var('control:aux:frequency') / 2048,output_scale = 0.25,offset_x = 20000 / var('control:aux:frequency'),octave_output_scale_multiplier = 0.5,octave_input_scale_multiplier = 3}"
+    },
+    "aux_basic": {
+      "type": "noise-expression",
+      "name": "aux_basic",
+      "expression": "clamp(0.5 + var('control:aux:bias') + aux_noise, 0, 1)"
+    },
+    "aux_nauvis": {
+      "type": "noise-expression",
+      "name": "aux_nauvis",
+      "expression": "clamp(0.5 + var('control:aux:bias') + 0.06 * (nauvis_plateaus - 0.4)+ aux_noise,0, 1)"
+    },
+    "elevation": {
+      "type": "noise-expression",
+      "name": "elevation",
+      "intended_property": "elevation",
+      "expression": "elevation_nauvis",
+      "localised_name": [
+        "noise-expression.elevation_nauvis"
+      ]
+    },
+    "elevation_nauvis": {
+      "type": "noise-expression",
+      "name": "elevation_nauvis",
+      "expression": "elevation_nauvis_function(nauvis_hills_plateaus)"
+    },
+    "elevation_nauvis_no_cliff": {
+      "type": "noise-expression",
+      "name": "elevation_nauvis_no_cliff",
+      "expression": "elevation_nauvis_function(0)"
+    },
+    "elevation_lakes": {
+      "type": "noise-expression",
+      "name": "elevation_lakes",
+      "intended_property": "elevation",
+      "expression": "finish_elevation{elevation = make_0_12like_lakes{x = x,y = y,bias = 20,terrain_octaves = 8,segmentation_multiplier = segmentation_multiplier},segmentation_multiplier = segmentation_multiplier}"
+    },
+    "elevation_island": {
+      "type": "noise-expression",
+      "name": "elevation_island",
+      "intended_property": "elevation",
+      "order": "z",
+      "expression": "finish_elevation{elevation = make_0_12like_lakes{x = x,y = y,bias = -1000,terrain_octaves = 8,segmentation_multiplier = segmentation_mult},segmentation_multiplier = segmentation_mult}",
+      "local_expressions": {
+        "segmentation_mult": "segmentation_multiplier / 4"
+      }
+    },
+    "cliff_elevation": {
+      "type": "noise-expression",
+      "name": "cliff_elevation",
+      "expression": "cliff_elevation_nauvis",
+      "localised_name": [
+        "noise-expression.cliff_elevation_nauvis"
+      ]
+    },
+    "cliff_elevation_from_elevation": {
+      "type": "noise-expression",
+      "name": "cliff_elevation_from_elevation",
+      "expression": "elevation"
+    },
+    "cliff_elevation_nauvis": {
+      "type": "noise-expression",
+      "name": "cliff_elevation_nauvis",
+      "expression": "10 + 30 * (nauvis_hills - nauvis_hills_cliff_level)"
+    },
+    "cliffiness": {
+      "type": "noise-expression",
+      "name": "cliffiness",
+      "expression": "cliffiness_nauvis",
+      "localised_name": [
+        "noise-expression.cliffiness_nauvis"
+      ]
+    },
+    "cliffiness_basic": {
+      "type": "noise-expression",
+      "name": "cliffiness_basic",
+      "expression": "clamp(0.5 * log2(cliff_richness) + quick_multioctave_noise{x = x,y = y,seed0 = map_seed,seed1 = 123,input_scale = 1/32,output_scale = 1,octaves = 2,octave_output_scale_multiplier = 1,octave_input_scale_multiplier = 1/3},0, 1) + 0.5"
+    },
+    "cliffiness_nauvis": {
+      "type": "noise-expression",
+      "name": "cliffiness_nauvis",
+      "expression": "(main_cliffiness >= cliff_cutoff) * 10",
+      "local_expressions": {
+        "cliff_cutoff": "2 * cliff_gap_size ^ 1.5",
+        "cliff_gap_size": "0.5 - 0.5 * slider_to_linear(cliff_richness, -1, 1)",
+        "main_cliffiness": "min( base_cliffiness,forest_path_cliffiness,bridge_path_cliffiness,elevation_cliffiness,starting_area_cliffiness,4 * low_frequency_cliffiness)",
+        "base_cliffiness": "(nauvis_cliff_ringbreak - 0.01) * 60",
+        "forest_path_cliffiness": "(forest_path_billows - 0.03) * 12",
+        "bridge_path_cliffiness": "(nauvis_bridge_billows - 0.05) * 15",
+        "elevation_cliffiness": "(elevation_nauvis_no_cliff - 4) / 2",
+        "starting_area_cliffiness": "-2 + distance * segmentation_multiplier / 120",
+        "low_frequency_cliffiness": "1.5+ basis_noise{x = x,y = y,seed0 = map_seed,seed1 = 86883,input_scale = nauvis_segmentation_multiplier/500,output_scale = 0.51}+ min(slider_to_linear(cliff_frequency, -1.7, 1.7),slider_to_linear(cliff_richness, -1, 1))",
+        "cliff_frequency": "40 / cliff_elevation_interval"
+      }
+    },
+    "nauvis_segmentation_multiplier": {
+      "type": "noise-expression",
+      "name": "nauvis_segmentation_multiplier",
+      "expression": "1.5 * control:water:frequency"
+    },
+    "nauvis_persistance": {
+      "type": "noise-expression",
+      "name": "nauvis_persistance",
+      "expression": "clamp(amplitude_corrected_multioctave_noise{x = x,y = y,seed0 = map_seed,seed1 = 500,octaves = 5,input_scale = nauvis_segmentation_multiplier / 2,offset_x = 10000 / nauvis_segmentation_multiplier,persistence = 0.7,amplitude = 0.5} + 0.55,0.5, 0.65)"
+    },
+    "nauvis_detail": {
+      "type": "noise-expression",
+      "name": "nauvis_detail",
+      "expression": "variable_persistence_multioctave_noise{x = x,y = y,seed0 = map_seed,seed1 = 600,input_scale = nauvis_segmentation_multiplier / 14,output_scale = 0.03,offset_x = 10000 / nauvis_segmentation_multiplier,octaves = 5,persistence = nauvis_persistance}"
+    },
+    "forest_path_billows": {
+      "type": "noise-expression",
+      "name": "forest_path_billows",
+      "expression": "abs(multioctave_noise{x = x,y = y,persistence = 0.5,seed0 = map_seed,seed1 = 1800,octaves = 4,input_scale = nauvis_segmentation_multiplier / 100})"
+    },
+    "forest_paths": {
+      "type": "noise-expression",
+      "name": "forest_paths",
+      "expression": "(forest_path_billows - 0.07) * 3"
+    },
+    "nauvis_hills_paths": {
+      "type": "noise-expression",
+      "name": "nauvis_hills_paths",
+      "expression": "(nauvis_hills - 0.1) * 3"
+    },
+    "nauvis_bridge_paths": {
+      "type": "noise-expression",
+      "name": "nauvis_bridge_paths",
+      "expression": "(nauvis_bridge_billows - 0.07) * 5"
+    },
+    "tree_small_noise": {
+      "type": "noise-expression",
+      "name": "tree_small_noise",
+      "expression": "multioctave_noise{x = x,y = y,persistence = 0.75,seed0 = map_seed,seed1 = 'tree-small',octaves = 3,input_scale = 0.2,output_scale = 0.5}"
+    },
+    "trees_forest_path_cutout": {
+      "type": "noise-expression",
+      "name": "trees_forest_path_cutout",
+      "expression": "min(nauvis_bridge_paths, nauvis_hills_paths, forest_paths)"
+    },
+    "trees_forest_path_cutout_faded": {
+      "type": "noise-expression",
+      "name": "trees_forest_path_cutout_faded",
+      "expression": "trees_forest_path_cutout * 0.3 + tree_small_noise * 0.1"
+    },
+    "nauvis_bridge_billows": {
+      "type": "noise-expression",
+      "name": "nauvis_bridge_billows",
+      "expression": "abs(multioctave_noise{x = x,y = y,persistence = 0.5,seed0 = map_seed,seed1 = 700,octaves = 4,input_scale = nauvis_segmentation_multiplier / 150})"
+    },
+    "nauvis_bridges": {
+      "type": "noise-expression",
+      "name": "nauvis_bridges",
+      "expression": "1 - 0.1 * nauvis_bridge_billows - 0.9 * max(0, -0.1 + nauvis_bridge_billows)"
+    },
+    "nauvis_hills_offset_raw_x": {
+      "type": "noise-expression",
+      "name": "nauvis_hills_offset_raw_x",
+      "expression": "basis_noise{x = x,y = y,seed0 = map_seed,seed1 = 'nauvis_offset_x',input_scale = nauvis_segmentation_multiplier / 500}"
+    },
+    "nauvis_hills_offset_raw_y": {
+      "type": "noise-expression",
+      "name": "nauvis_hills_offset_raw_y",
+      "expression": "basis_noise{x = x,y = y,seed0 = map_seed,seed1 = 'nauvis_offset_y',input_scale = nauvis_segmentation_multiplier / 500}"
+    },
+    "nauvis_hills_offset_normalized_x": {
+      "type": "noise-expression",
+      "name": "nauvis_hills_offset_normalized_x",
+      "expression": "normalize(nauvis_hills_offset_raw_x, nauvis_hills_offset_raw_y, 0.001)"
+    },
+    "nauvis_hills_offset_normalized_y": {
+      "type": "noise-expression",
+      "name": "nauvis_hills_offset_normalized_y",
+      "expression": "normalize(nauvis_hills_offset_raw_y, nauvis_hills_offset_raw_x, 0.001)"
+    },
+    "nauvis_hills": {
+      "type": "noise-expression",
+      "name": "nauvis_hills",
+      "expression": "abs(multioctave_noise{x = x,y = y,persistence = 0.5,seed0 = map_seed,seed1 = 900,octaves = 4,input_scale = nauvis_segmentation_multiplier / 90})"
+    },
+    "nauvis_hills_offset": {
+      "type": "noise-expression",
+      "name": "nauvis_hills_offset",
+      "expression": "abs(multioctave_noise{x = x + 12 * nauvis_hills_offset_normalized_x,y = y + 12 * nauvis_hills_offset_normalized_y,persistence = 0.5,seed0 = map_seed,seed1 = 900,octaves = 4,input_scale = nauvis_segmentation_multiplier / 90})"
+    },
+    "nauvis_cliff_ringbreak": {
+      "type": "noise-expression",
+      "name": "nauvis_cliff_ringbreak",
+      "expression": "abs(nauvis_hills - nauvis_hills_offset)"
+    },
+    "nauvis_plateaus": {
+      "type": "noise-expression",
+      "name": "nauvis_plateaus",
+      "expression": "0.5 + clamp((nauvis_hills - nauvis_hills_cliff_level) * 10, -0.5, 0.5)"
+    },
+    "nauvis_hills_plateaus": {
+      "type": "noise-expression",
+      "name": "nauvis_hills_plateaus",
+      "expression": "0.1 * nauvis_hills + 0.8 * nauvis_plateaus"
+    },
+    "nauvis_hills_cliff_level": {
+      "type": "noise-expression",
+      "name": "nauvis_hills_cliff_level",
+      "expression": "clamp(0.65 + basis_noise{x = x,y = y,seed0 = map_seed,seed1 = 99584,input_scale = nauvis_segmentation_multiplier/500,output_scale = 0.6}, 0.15, 1.15)"
+    },
+    "nauvis_macro": {
+      "type": "noise-expression",
+      "name": "nauvis_macro",
+      "expression": "multioctave_noise{x = x,y = y,persistence = 0.6,seed0 = map_seed,seed1 = 1000,octaves = 2,input_scale = nauvis_segmentation_multiplier / 1600}* max(0, multioctave_noise{x = x,y = y,persistence = 0.6,seed0 = map_seed,seed1 = 1100,octaves = 1,input_scale = nauvis_segmentation_multiplier / 1600})"
+    },
+    "distance": {
+      "type": "noise-expression",
+      "name": "distance",
+      "expression": "distance_from_nearest_point{x = x, y = y, points = starting_positions}"
+    },
+    "tier_from_start": {
+      "type": "noise-expression",
+      "name": "tier_from_start",
+      "expression": "max(0, distance - starting_area_radius) / starting_area_radius"
+    },
+    "starting_area_weight": {
+      "type": "noise-expression",
+      "name": "starting_area_weight",
+      "expression": "1 - min(1, 0.5 * tier_from_start)"
+    },
+    "water_level": {
+      "type": "noise-expression",
+      "name": "water_level",
+      "expression": "10 * log2(control:water:size)"
+    },
+    "segmentation_multiplier": {
+      "type": "noise-expression",
+      "name": "segmentation_multiplier",
+      "expression": "control:water:frequency"
+    },
+    "x_from_start": {
+      "type": "noise-expression",
+      "name": "x_from_start",
+      "expression": "distance_from_nearest_point_x(x, y, starting_positions)"
+    },
+    "y_from_start": {
+      "type": "noise-expression",
+      "name": "y_from_start",
+      "expression": "distance_from_nearest_point_y(x, y, starting_positions)"
+    },
+    "default_regular_resource_patch_set_count": {
+      "type": "noise-expression",
+      "name": "default_regular_resource_patch_set_count",
+      "expression": 6
+    },
+    "default_starting_resource_patch_set_count": {
+      "type": "noise-expression",
+      "name": "default_starting_resource_patch_set_count",
+      "expression": 4
+    },
+    "default-iron-ore-patches": {
+      "type": "noise-expression",
+      "name": "default-iron-ore-patches",
+      "expression": "resource_autoplace_all_patches{base_density = 10,base_spots_per_km2 = 2.5,candidate_spot_count = 22,frequency_multiplier = var('control:iron-ore:frequency'),has_starting_area_placement = 1,random_spot_size_minimum = 0.25,random_spot_size_maximum = 2,regular_blob_amplitude_multiplier = 0.125,regular_patch_set_count = default_regular_resource_patch_set_count,regular_patch_set_index = 0,regular_rq_factor = 0.11,seed1 = 100,size_multiplier = var('control:iron-ore:size'),starting_blob_amplitude_multiplier = 0.125,starting_patch_set_count = default_starting_resource_patch_set_count,starting_patch_set_index = 0,starting_rq_factor = 0.21428571428571}"
+    },
+    "default-copper-ore-patches": {
+      "type": "noise-expression",
+      "name": "default-copper-ore-patches",
+      "expression": "resource_autoplace_all_patches{base_density = 8,base_spots_per_km2 = 2.5,candidate_spot_count = 22,frequency_multiplier = var('control:copper-ore:frequency'),has_starting_area_placement = 1,random_spot_size_minimum = 0.25,random_spot_size_maximum = 2,regular_blob_amplitude_multiplier = 0.125,regular_patch_set_count = default_regular_resource_patch_set_count,regular_patch_set_index = 1,regular_rq_factor = 0.11,seed1 = 100,size_multiplier = var('control:copper-ore:size'),starting_blob_amplitude_multiplier = 0.125,starting_patch_set_count = default_starting_resource_patch_set_count,starting_patch_set_index = 1,starting_rq_factor = 0.17142857142857}"
+    },
+    "default-coal-patches": {
+      "type": "noise-expression",
+      "name": "default-coal-patches",
+      "expression": "resource_autoplace_all_patches{base_density = 8,base_spots_per_km2 = 2.5,candidate_spot_count = 21,frequency_multiplier = var('control:coal:frequency'),has_starting_area_placement = 1,random_spot_size_minimum = 0.25,random_spot_size_maximum = 2,regular_blob_amplitude_multiplier = 0.125,regular_patch_set_count = default_regular_resource_patch_set_count,regular_patch_set_index = 2,regular_rq_factor = 0.1,seed1 = 100,size_multiplier = var('control:coal:size'),starting_blob_amplitude_multiplier = 0.125,starting_patch_set_count = default_starting_resource_patch_set_count,starting_patch_set_index = 2,starting_rq_factor = 0.15714285714286}"
+    },
+    "default-stone-patches": {
+      "type": "noise-expression",
+      "name": "default-stone-patches",
+      "expression": "resource_autoplace_all_patches{base_density = 4,base_spots_per_km2 = 2.5,candidate_spot_count = 21,frequency_multiplier = var('control:stone:frequency'),has_starting_area_placement = 1,random_spot_size_minimum = 0.25,random_spot_size_maximum = 2,regular_blob_amplitude_multiplier = 0.125,regular_patch_set_count = default_regular_resource_patch_set_count,regular_patch_set_index = 3,regular_rq_factor = 0.1,seed1 = 100,size_multiplier = var('control:stone:size'),starting_blob_amplitude_multiplier = 0.125,starting_patch_set_count = default_starting_resource_patch_set_count,starting_patch_set_index = 3,starting_rq_factor = 0.15714285714286}"
+    },
+    "default-uranium-ore-patches": {
+      "type": "noise-expression",
+      "name": "default-uranium-ore-patches",
+      "expression": "resource_autoplace_all_patches{base_density = 0.9,base_spots_per_km2 = 1.25,candidate_spot_count = 21,frequency_multiplier = var('control:uranium-ore:frequency'),has_starting_area_placement = 0,random_spot_size_minimum = 2,random_spot_size_maximum = 4,regular_blob_amplitude_multiplier = 0.125,regular_patch_set_count = default_regular_resource_patch_set_count,regular_patch_set_index = 5,regular_rq_factor = 0.1,seed1 = 100,size_multiplier = var('control:uranium-ore:size'),starting_blob_amplitude_multiplier = 0.125,starting_patch_set_count = default_starting_resource_patch_set_count,starting_patch_set_index = 0,starting_rq_factor = 0.14285714285714}"
+    },
+    "default-crude-oil-patches": {
+      "type": "noise-expression",
+      "name": "default-crude-oil-patches",
+      "expression": "resource_autoplace_all_patches{base_density = 8.2,base_spots_per_km2 = 1.8,candidate_spot_count = 21,frequency_multiplier = var('control:crude-oil:frequency'),has_starting_area_placement = 0,random_spot_size_minimum = 1,random_spot_size_maximum = 1,regular_blob_amplitude_multiplier = 0.125,regular_patch_set_count = default_regular_resource_patch_set_count,regular_patch_set_index = 4,regular_rq_factor = 0.1,seed1 = 100,size_multiplier = var('control:crude-oil:size'),starting_blob_amplitude_multiplier = 0.125,starting_patch_set_count = default_starting_resource_patch_set_count,starting_patch_set_index = 0,starting_rq_factor = 0.14285714285714}"
+    },
+    "tree_01": {
+      "type": "noise-expression",
+      "name": "tree_01",
+      "expression": "min(0.45, trees_forest_path_cutout_faded,min(0,asymmetric_ramps{input=temperature, from_bottom=0, from_top=10, to_top=14, to_bottom=15},asymmetric_ramps{input=moisture, from_bottom=0.6, from_top=0.7, to_top=1, to_bottom=2})+ min(0, distance/20 - 3)- 0.5 + 0.2 * control:trees:size+ tree_small_noise * 0.1+ multioctave_noise{x = x,y = y,persistence = 0.65,seed0 = map_seed,seed1 = 'tree-01',octaves = 3,input_scale = 1/25 * control:trees:frequency,output_scale = 0.8})"
+    },
+    "tree_02": {
+      "type": "noise-expression",
+      "name": "tree_02",
+      "expression": "min(0.4, trees_forest_path_cutout_faded,min(0,asymmetric_ramps{input=temperature, from_bottom=0, from_top=10, to_top=14, to_bottom=15},asymmetric_ramps{input=moisture, from_bottom=0.4, from_top=0.5, to_top=0.7, to_bottom=0.8})+ min(0, distance/20 - 3)- 0.5 + 0.2 * control:trees:size+ tree_small_noise * 0.1+ multioctave_noise{x = x,y = y,persistence = 0.65,seed0 = map_seed,seed1 = 'tree-02',octaves = 3,input_scale = 1/25 * control:trees:frequency,output_scale = 0.75})"
+    },
+    "tree_02_red": {
+      "type": "noise-expression",
+      "name": "tree_02_red",
+      "expression": "min(0.3, trees_forest_path_cutout_faded,min(0,asymmetric_ramps{input=temperature, from_bottom=0, from_top=10, to_top=14, to_bottom=15},asymmetric_ramps{input=moisture, from_bottom=0.2, from_top=0.3, to_top=0.5, to_bottom=0.6})+ min(0, distance/20 - 3)- 0.5 + 0.2 * control:trees:size+ tree_small_noise * 0.1+ multioctave_noise{x = x,y = y,persistence = 0.65,seed0 = map_seed,seed1 = 'tree-02-red',octaves = 3,input_scale = 1/25 * control:trees:frequency,output_scale = 0.7})"
+    },
+    "tree_03": {
+      "type": "noise-expression",
+      "name": "tree_03",
+      "expression": "min(0.4, trees_forest_path_cutout_faded,min(0,asymmetric_ramps{input=temperature, from_bottom=15, from_top=16, to_top=35, to_bottom=45},asymmetric_ramps{input=moisture, from_bottom=0.4, from_top=0.5, to_top=0.7, to_bottom=0.8})+ min(0, distance/20 - 3)- 0.5 + 0.2 * control:trees:size+ tree_small_noise * 0.1+ multioctave_noise{x = x,y = y,persistence = 0.65,seed0 = map_seed,seed1 = 'tree-03',octaves = 3,input_scale = 1/35 * control:trees:frequency,output_scale = 0.75})"
+    },
+    "tree_04": {
+      "type": "noise-expression",
+      "name": "tree_04",
+      "expression": "min(0.45, trees_forest_path_cutout_faded,min(0,asymmetric_ramps{input=temperature, from_bottom=13, from_top=14, to_top=16, to_bottom=17},asymmetric_ramps{input=moisture, from_bottom=0.7, from_top=0.9, to_top=1, to_bottom=2})+ min(0, distance/20 - 3)- 0.5 + 0.2 * control:trees:size+ tree_small_noise * 0.1+ multioctave_noise{x = x,y = y,persistence = 0.65,seed0 = map_seed,seed1 = 'tree-04',octaves = 3,input_scale = 1/30 * control:trees:frequency,output_scale = 0.8})"
+    },
+    "tree_05": {
+      "type": "noise-expression",
+      "name": "tree_05",
+      "expression": "min(0.45, trees_forest_path_cutout_faded,min(0,asymmetric_ramps{input=temperature, from_bottom=15, from_top=16, to_top=35, to_bottom=45},asymmetric_ramps{input=moisture, from_bottom=0.6, from_top=0.7, to_top=1, to_bottom=2})+ min(0, distance/20 - 3)- 0.45 + 0.2 * control:trees:size+ tree_small_noise * 0.1+ multioctave_noise{x = x,y = y,persistence = 0.65,seed0 = map_seed,seed1 = 'tree-05',octaves = 3,input_scale = 1/40 * control:trees:frequency,output_scale = 0.8})"
+    },
+    "tree_06": {
+      "type": "noise-expression",
+      "name": "tree_06",
+      "expression": "min(0.2, trees_forest_path_cutout_faded,min(0,asymmetric_ramps{input=temperature, from_bottom=0, from_top=10, to_top=14, to_bottom=15},asymmetric_ramps{input=moisture, from_bottom=0.1, from_top=0.2, to_top=0.3, to_bottom=0.4})+ min(0, distance/20 - 3)- 0.5 + 0.2 * control:trees:size+ tree_small_noise * 0.1+ multioctave_noise{x = x,y = y,persistence = 0.65,seed0 = map_seed,seed1 = 'tree-06',octaves = 3,input_scale = 1/22 * control:trees:frequency,output_scale = 0.6})"
+    },
+    "tree_06_brown": {
+      "type": "noise-expression",
+      "name": "tree_06_brown",
+      "expression": "min(0.1, trees_forest_path_cutout_faded,min(0,asymmetric_ramps{input=temperature, from_bottom=0, from_top=10, to_top=14, to_bottom=15},asymmetric_ramps{input=moisture, from_bottom=0, from_top=0.1, to_top=0.2, to_bottom=0.3})+ min(0, distance/20 - 3)- 0.5 + 0.2 * control:trees:size+ tree_small_noise * 0.1+ multioctave_noise{x = x,y = y,persistence = 0.65,seed0 = map_seed,seed1 = 'tree-06-brown',octaves = 3,input_scale = 1/22 * control:trees:frequency,output_scale = 0.5})"
+    },
+    "tree_07": {
+      "type": "noise-expression",
+      "name": "tree_07",
+      "expression": "min(0.4, trees_forest_path_cutout_faded,min(0,asymmetric_ramps{input=temperature, from_bottom=13, from_top=14, to_top=16, to_bottom=17},asymmetric_ramps{input=moisture, from_bottom=0.5, from_top=0.6, to_top=0.9, to_bottom=1})+ min(0, distance/20 - 3)- 0.45 + 0.2 * control:trees:size+ tree_small_noise * 0.1+ multioctave_noise{x = x,y = y,persistence = 0.65,seed0 = map_seed,seed1 = 'tree-07',octaves = 3,input_scale = 1/40 * control:trees:frequency,output_scale = 0.75})"
+    },
+    "tree_08": {
+      "type": "noise-expression",
+      "name": "tree_08",
+      "expression": "min(0.3, trees_forest_path_cutout_faded,min(0,asymmetric_ramps{input=temperature, from_bottom=13, from_top=14, to_top=16, to_bottom=17},asymmetric_ramps{input=moisture, from_bottom=0.3, from_top=0.4, to_top=0.6, to_bottom=0.7})+ min(0, distance/20 - 3)- 0.5 + 0.2 * control:trees:size+ tree_small_noise * 0.1+ multioctave_noise{x = x,y = y,persistence = 0.65,seed0 = map_seed,seed1 = 'tree-08',octaves = 3,input_scale = 1/30 * control:trees:frequency,output_scale = 0.7})"
+    },
+    "tree_08_brown": {
+      "type": "noise-expression",
+      "name": "tree_08_brown",
+      "expression": "min(0.2, trees_forest_path_cutout_faded,min(0,asymmetric_ramps{input=temperature, from_bottom=13, from_top=14, to_top=16, to_bottom=17},asymmetric_ramps{input=moisture, from_bottom=0.2, from_top=0.3, to_top=0.4, to_bottom=0.5})+ min(0, distance/20 - 3)- 0.5 + 0.2 * control:trees:size+ tree_small_noise * 0.1+ multioctave_noise{x = x,y = y,persistence = 0.65,seed0 = map_seed,seed1 = 'tree-08-brown',octaves = 3,input_scale = 1/30 * control:trees:frequency,output_scale = 0.6})"
+    },
+    "tree_08_red": {
+      "type": "noise-expression",
+      "name": "tree_08_red",
+      "expression": "min(0.1, trees_forest_path_cutout_faded,min(0,asymmetric_ramps{input=temperature, from_bottom=13, from_top=14, to_top=16, to_bottom=17},asymmetric_ramps{input=moisture, from_bottom=0.1, from_top=0.2, to_top=0.3, to_bottom=0.4})+ min(0, distance/20 - 3)- 0.5 + 0.2 * control:trees:size+ tree_small_noise * 0.1+ multioctave_noise{x = x,y = y,persistence = 0.65,seed0 = map_seed,seed1 = 'tree-08-red',octaves = 3,input_scale = 1/30 * control:trees:frequency,output_scale = 0.5})"
+    },
+    "tree_09": {
+      "type": "noise-expression",
+      "name": "tree_09",
+      "expression": "min(0.3, trees_forest_path_cutout_faded,min(0,asymmetric_ramps{input=temperature, from_bottom=15, from_top=16, to_top=35, to_bottom=45},asymmetric_ramps{input=moisture, from_bottom=0.2, from_top=0.3, to_top=0.5, to_bottom=0.6})+ min(0, distance/20 - 3)- 0.5 + 0.2 * control:trees:size+ tree_small_noise * 0.1+ multioctave_noise{x = x,y = y,persistence = 0.65,seed0 = map_seed,seed1 = 'tree-09',octaves = 3,input_scale = 1/25 * control:trees:frequency,output_scale = 0.7})"
+    },
+    "tree_09_brown": {
+      "type": "noise-expression",
+      "name": "tree_09_brown",
+      "expression": "min(0.2, trees_forest_path_cutout_faded,min(0,asymmetric_ramps{input=temperature, from_bottom=15, from_top=16, to_top=35, to_bottom=45},asymmetric_ramps{input=moisture, from_bottom=0.1, from_top=0.2, to_top=0.3, to_bottom=0.4})+ min(0, distance/20 - 3)- 0.5 + 0.2 * control:trees:size+ tree_small_noise * 0.1+ multioctave_noise{x = x,y = y,persistence = 0.65,seed0 = map_seed,seed1 = 'tree-09-brown',octaves = 3,input_scale = 1/25 * control:trees:frequency,output_scale = 0.6})"
+    },
+    "tree_09_red": {
+      "type": "noise-expression",
+      "name": "tree_09_red",
+      "expression": "min(0.1, trees_forest_path_cutout_faded,min(0,asymmetric_ramps{input=temperature, from_bottom=15, from_top=16, to_top=35, to_bottom=45},asymmetric_ramps{input=moisture, from_bottom=0, from_top=0.1, to_top=0.2, to_bottom=0.3})+ min(0, distance/20 - 3)- 0.5 + 0.2 * control:trees:size+ tree_small_noise * 0.1+ multioctave_noise{x = x,y = y,persistence = 0.65,seed0 = map_seed,seed1 = 'tree-09-red',octaves = 3,input_scale = 1/25 * control:trees:frequency,output_scale = 0.5})"
+    },
+    "tree_dry_hairy": {
+      "type": "noise-expression",
+      "name": "tree_dry_hairy",
+      "expression": "0.2 * max(tree_05, tree_06, tree_06_brown) * clamp(1 - tree_small_noise, 0, 2)"
+    },
+    "tree_dead_dry_hairy": {
+      "type": "noise-expression",
+      "name": "tree_dead_dry_hairy",
+      "expression": "0.2 * max(tree_05, tree_06, tree_06_brown, tree_09, tree_09_brown, tree_09_red) * clamp(1 - tree_small_noise, 0, 2)"
+    },
+    "tree_dead_grey_trunk": {
+      "type": "noise-expression",
+      "name": "tree_dead_grey_trunk",
+      "expression": "max(0.2 * max(tree_dead_desert, tree_02, tree_02_red, tree_03, tree_04) * clamp(1 - tree_small_noise, 0, 2), tree_dead_desert)"
+    },
+    "tree_dry": {
+      "type": "noise-expression",
+      "name": "tree_dry",
+      "expression": "0.2 * max(tree_01,  tree_09, tree_09_brown, tree_09_red) * clamp(1 - tree_small_noise, 0, 2)"
+    },
+    "tree_dead_desert": {
+      "type": "noise-expression",
+      "name": "tree_dead_desert",
+      "expression": "0.2 * max(tree_08, tree_08_brown, tree_08_red, tree_08_extended, desert) * clamp(1 - tree_small_noise, 0, 2)",
+      "local_expressions": {
+        "tree_08_extended": "min(0.1, trees_forest_path_cutout_faded,min(0,asymmetric_ramps{input=temperature, from_bottom=13, from_top=14, to_top=16, to_bottom=17},asymmetric_ramps{input=moisture, from_bottom=0.05, from_top=0.15, to_top=0.3, to_bottom=0.4})+ (min(0, distance/20 - 3) - 0.5 + 0.2 * control:trees:size)+ tree_noise)",
+        "desert": "min(0.1,trees_forest_path_cutout_faded,min(0, asymmetric_ramps{input=moisture, from_bottom=-0.2, from_top=-0.1, to_top=0.1, to_bottom=0.2})+ (min(0, distance/20 - 3) - 0.5 + 0.2 * control:trees:size)+ min(tree_noise, desert_noise + 0.2))",
+        "tree_noise": "multioctave_noise{x = x,y = y,persistence = 0.65,seed0 = map_seed,seed1 = 'tree-08-red',octaves = 3,input_scale = 1/30 * control:trees:frequency,output_scale = 0.5}",
+        "desert_noise": "multioctave_noise{x = x,y = y,persistence = 0.65,seed0 = map_seed,seed1 = 'tree-08-desert',octaves = 3,input_scale = 1/50 * control:trees:frequency,output_scale = 0.7}"
+      }
+    },
+    "enemy_base_intensity": {
+      "type": "noise-expression",
+      "name": "enemy_base_intensity",
+      "expression": "clamp(distance, 0, 2400) / 325"
+    },
+    "enemy_base_radius": {
+      "type": "noise-expression",
+      "name": "enemy_base_radius",
+      "expression": "sqrt(var('control:enemy-base:size')) * (15 + 4 * enemy_base_intensity)"
+    },
+    "enemy_base_frequency": {
+      "type": "noise-expression",
+      "name": "enemy_base_frequency",
+      "expression": "(0.00001 + 0.000003 * enemy_base_intensity) * var('control:enemy-base:frequency')"
+    },
+    "enemy_base_probability": {
+      "type": "noise-expression",
+      "name": "enemy_base_probability",
+      "expression": "spot_noise{x = x,y = y,density_expression = spot_quantity_expression * max(0, enemy_base_frequency),spot_quantity_expression = spot_quantity_expression,spot_radius_expression = spot_radius_expression,spot_favorability_expression = 1,seed0 = map_seed,seed1 = 123,region_size = 512,candidate_point_count = 100,hard_region_target_quantity = 0,basement_value = -1000,maximum_spot_basement_radius = 128} + (blob(1/8, 1) + blob(1/24, 1) + blob(1/64, 2) - 0.5) * spot_radius_expression / 150 * (0.1 + 0.9 * clamp(distance / 3000, 0, 1)) - 0.3 + min(0, 20 / starting_area_radius * distance - 20)",
+      "local_expressions": {
+        "spot_radius_expression": "max(0, enemy_base_radius)",
+        "spot_quantity_expression": "pi/90 * spot_radius_expression ^ 3"
+      },
+      "local_functions": {
+        "blob": {
+          "parameters": [
+            "input_scale",
+            "output_scale"
+          ],
+          "expression": "basis_noise{x = x, y = y, seed0 = map_seed, seed1 = 123, input_scale = input_scale, output_scale = output_scale}"
+        }
+      }
+    },
+    "rock_noise": {
+      "type": "noise-expression",
+      "name": "rock_noise",
+      "expression": "multioctave_noise{x = x,y = y,seed0 = map_seed,seed1 = 137,octaves = 4,persistence = 0.9,input_scale = 0.15 * var('control:rocks:frequency'),output_scale = 1} + 0.25 + 0.75 * (slider_rescale(control:rocks:size, 1.5) - 1)"
+    },
+    "rock_density": {
+      "type": "noise-expression",
+      "name": "rock_density",
+      "expression": "rock_noise - max(0, 1.1 - distance / 32)"
+    },
+    "decorative_knockout": {
+      "type": "noise-expression",
+      "name": "decorative_knockout",
+      "expression": "multioctave_noise{x = x, y = y, persistence = 0.7, seed0 = map_seed, seed1 = 1300000, octaves = 2, input_scale = 1/2.5}"
+    },
+    "grass_noise": {
+      "type": "noise-expression",
+      "name": "grass_noise",
+      "expression": "decorative_mix_noise{seed = 1000, input_scale = 1/22}"
+    },
+    "pita_noise": {
+      "type": "noise-expression",
+      "name": "pita_noise",
+      "expression": "decorative_mix_noise{seed = 2000, input_scale = 1/30}"
+    },
+    "croton_noise": {
+      "type": "noise-expression",
+      "name": "croton_noise",
+      "expression": "decorative_mix_noise{seed = 3000, input_scale = 1/32}"
+    },
+    "garballo_noise": {
+      "type": "noise-expression",
+      "name": "garballo_noise",
+      "expression": "decorative_mix_noise{seed = 4000, input_scale = 1/26}"
+    },
+    "asterisk_noise": {
+      "type": "noise-expression",
+      "name": "asterisk_noise",
+      "expression": "decorative_mix_noise{seed = 5000, input_scale = 1/28}"
+    }
+  },
+  "tile": {
+    "tile-unknown": {
+      "name": "tile-unknown",
+      "autoplace": null,
+      "map_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0
+      }
+    },
+    "water-wube": {
+      "name": "water-wube",
+      "autoplace": null,
+      "map_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0
+      }
+    },
+    "out-of-map": {
+      "name": "out-of-map",
+      "autoplace": null,
+      "map_color": [
+        0,
+        0,
+        0
+      ]
+    },
+    "deepwater": {
+      "name": "deepwater",
+      "autoplace": {
+        "probability_expression": "water_base(-2, 200)"
+      },
+      "map_color": [
+        38,
+        64,
+        73
+      ]
+    },
+    "deepwater-green": {
+      "name": "deepwater-green",
+      "autoplace": null,
+      "map_color": [
+        0.09410000000000000142108547152020037174224853515625,
+        0.149000000000000003552713678800500929355621337890625,
+        0.0660000000000000053290705182007513940334320068359375
+      ]
+    },
+    "water": {
+      "name": "water",
+      "autoplace": {
+        "probability_expression": "water_base(0, 100)"
+      },
+      "map_color": [
+        51,
+        83,
+        95
+      ]
+    },
+    "water-green": {
+      "name": "water-green",
+      "autoplace": null,
+      "map_color": [
+        31,
+        48,
+        18
+      ]
+    },
+    "water-shallow": {
+      "name": "water-shallow",
+      "autoplace": null,
+      "map_color": [
+        82,
+        98,
+        92
+      ]
+    },
+    "water-mud": {
+      "name": "water-mud",
+      "autoplace": null,
+      "map_color": [
+        65,
+        89,
+        90
+      ]
+    },
+    "grass-1": {
+      "name": "grass-1",
+      "autoplace": {
+        "probability_expression": "expression_in_range_base(-10, 0.7, 11, 11) + noise_layer_noise(19)"
+      },
+      "map_color": [
+        55,
+        53,
+        11
+      ]
+    },
+    "grass-2": {
+      "name": "grass-2",
+      "autoplace": {
+        "probability_expression": "expression_in_range_base(0.45, 0.45, 11, 0.8) + noise_layer_noise(20)"
+      },
+      "map_color": [
+        66,
+        57,
+        15
+      ]
+    },
+    "grass-3": {
+      "name": "grass-3",
+      "autoplace": {
+        "probability_expression": "expression_in_range_base(-10, 0.6, 0.65, 0.9) + noise_layer_noise(21)"
+      },
+      "map_color": [
+        65,
+        52,
+        28
+      ]
+    },
+    "grass-4": {
+      "name": "grass-4",
+      "autoplace": {
+        "probability_expression": "expression_in_range_base(-10, 0.5, 0.55, 0.7) + noise_layer_noise(22)"
+      },
+      "map_color": [
+        59,
+        40,
+        18
+      ]
+    },
+    "dry-dirt": {
+      "name": "dry-dirt",
+      "autoplace": {
+        "probability_expression": "expression_in_range_base(0.45, -10, 0.55, 0.35) + noise_layer_noise(13)"
+      },
+      "map_color": [
+        94,
+        66,
+        37
+      ]
+    },
+    "dirt-1": {
+      "name": "dirt-1",
+      "autoplace": {
+        "probability_expression": "max(expression_in_range_base(-10, 0.25, 0.45, 0.3),expression_in_range_base(0.4, -10, 0.45, 0.25)) + noise_layer_noise(6)"
+      },
+      "map_color": [
+        141,
+        104,
+        60
+      ]
+    },
+    "dirt-2": {
+      "name": "dirt-2",
+      "autoplace": {
+        "probability_expression": "expression_in_range_base(-10, 0.3, 0.45, 0.35) + noise_layer_noise(7)"
+      },
+      "map_color": [
+        136,
+        96,
+        59
+      ]
+    },
+    "dirt-3": {
+      "name": "dirt-3",
+      "autoplace": {
+        "probability_expression": "expression_in_range_base(-10, 0.35, 0.55, 0.4) + noise_layer_noise(8)"
+      },
+      "map_color": [
+        133,
+        92,
+        53
+      ]
+    },
+    "dirt-4": {
+      "name": "dirt-4",
+      "autoplace": {
+        "probability_expression": "max(expression_in_range_base(0.55, -10, 0.6, 0.35),expression_in_range_base(0.6, 0.3, 11, 0.35)) + noise_layer_noise(9)"
+      },
+      "map_color": [
+        103,
+        72,
+        43
+      ]
+    },
+    "dirt-5": {
+      "name": "dirt-5",
+      "autoplace": {
+        "probability_expression": "expression_in_range_base(-10, 0.4, 0.55, 0.45) + noise_layer_noise(10)"
+      },
+      "map_color": [
+        91,
+        63,
+        38
+      ]
+    },
+    "dirt-6": {
+      "name": "dirt-6",
+      "autoplace": {
+        "probability_expression": "expression_in_range_base(-10, 0.45, 0.55, 0.5) + noise_layer_noise(11)"
+      },
+      "map_color": [
+        80,
+        55,
+        31
+      ]
+    },
+    "dirt-7": {
+      "name": "dirt-7",
+      "autoplace": {
+        "probability_expression": "expression_in_range_base(-10, 0.5, 0.55, 0.55) + noise_layer_noise(12)"
+      },
+      "map_color": [
+        80,
+        54,
+        28
+      ]
+    },
+    "sand-1": {
+      "name": "sand-1",
+      "autoplace": {
+        "probability_expression": "max(expression_in_range_base(-10, -10, 0.25, 0.15),expression_in_range(5, inf, elevation, aux, -1.5, 0.5, 1.5, 1)) +noise_layer_noise(36)"
+      },
+      "map_color": [
+        138,
+        103,
+        58
+      ]
+    },
+    "sand-2": {
+      "name": "sand-2",
+      "autoplace": {
+        "probability_expression": "max(expression_in_range_base(-10, 0.15, 0.3, 0.2),expression_in_range_base(0.25, -10, 0.3, 0.15)) + noise_layer_noise(37)"
+      },
+      "map_color": [
+        128,
+        93,
+        52
+      ]
+    },
+    "sand-3": {
+      "name": "sand-3",
+      "autoplace": {
+        "probability_expression": "max(expression_in_range_base(-10, 0.2, 0.4, 0.25),expression_in_range_base(0.3, -10, 0.4, 0.2)) + noise_layer_noise(38)"
+      },
+      "map_color": [
+        115,
+        83,
+        47
+      ]
+    },
+    "red-desert-0": {
+      "name": "red-desert-0",
+      "autoplace": {
+        "probability_expression": "expression_in_range_base(0.55, 0.35, 11, 0.5) + noise_layer_noise(30)"
+      },
+      "map_color": [
+        103,
+        70,
+        32
+      ]
+    },
+    "red-desert-1": {
+      "name": "red-desert-1",
+      "autoplace": {
+        "probability_expression": "max(expression_in_range_base(0.6, -10, 0.7, 0.3),expression_in_range_base(0.7, 0.25, 11, 0.3)) + noise_layer_noise(31)"
+      },
+      "map_color": [
+        116,
+        81,
+        39
+      ]
+    },
+    "red-desert-2": {
+      "name": "red-desert-2",
+      "autoplace": {
+        "probability_expression": "max(expression_in_range_base(0.7, -10, 0.8, 0.25),expression_in_range_base(0.8, 0.2, 11, 0.25)) + noise_layer_noise(32)"
+      },
+      "map_color": [
+        116,
+        84,
+        43
+      ]
+    },
+    "red-desert-3": {
+      "name": "red-desert-3",
+      "autoplace": {
+        "probability_expression": "expression_in_range_base(0.8, -10, 11, 0.2) + noise_layer_noise(33)"
+      },
+      "map_color": [
+        128,
+        93,
+        52
+      ]
+    },
+    "nuclear-ground": {
+      "name": "nuclear-ground",
+      "autoplace": null,
+      "map_color": [
+        48,
+        40,
+        35
+      ]
+    },
+    "stone-path": {
+      "name": "stone-path",
+      "autoplace": null,
+      "map_color": [
+        86,
+        82,
+        74
+      ]
+    },
+    "lab-dark-1": {
+      "name": "lab-dark-1",
+      "autoplace": null,
+      "map_color": [
+        49,
+        49,
+        49
+      ]
+    },
+    "lab-dark-2": {
+      "name": "lab-dark-2",
+      "autoplace": null,
+      "map_color": [
+        0,
+        0,
+        0
+      ]
+    },
+    "lab-white": {
+      "name": "lab-white",
+      "autoplace": null,
+      "map_color": [
+        1,
+        1,
+        1
+      ]
+    },
+    "tutorial-grid": {
+      "name": "tutorial-grid",
+      "autoplace": null,
+      "map_color": [
+        122,
+        122,
+        122
+      ]
+    },
+    "concrete": {
+      "name": "concrete",
+      "autoplace": null,
+      "map_color": [
+        63,
+        61,
+        59
+      ]
+    },
+    "hazard-concrete-left": {
+      "name": "hazard-concrete-left",
+      "autoplace": null,
+      "map_color": [
+        176,
+        142,
+        39
+      ]
+    },
+    "hazard-concrete-right": {
+      "name": "hazard-concrete-right",
+      "autoplace": null,
+      "map_color": [
+        176,
+        142,
+        39
+      ]
+    },
+    "refined-concrete": {
+      "name": "refined-concrete",
+      "autoplace": null,
+      "map_color": [
+        49,
+        48,
+        45
+      ]
+    },
+    "refined-hazard-concrete-left": {
+      "name": "refined-hazard-concrete-left",
+      "autoplace": null,
+      "map_color": [
+        116,
+        94,
+        26
+      ]
+    },
+    "refined-hazard-concrete-right": {
+      "name": "refined-hazard-concrete-right",
+      "autoplace": null,
+      "map_color": [
+        116,
+        94,
+        26
+      ]
+    },
+    "landfill": {
+      "name": "landfill",
+      "autoplace": null,
+      "map_color": [
+        57,
+        39,
+        26
+      ]
+    },
+    "red-refined-concrete": {
+      "name": "red-refined-concrete",
+      "autoplace": null,
+      "map_color": {
+        "r": 0.814999999999999857891452847979962825775146484375,
+        "g": 0.02399999999999999911182158029987476766109466552734375,
+        "b": 0,
+        "a": 0.5
+      }
+    },
+    "green-refined-concrete": {
+      "name": "green-refined-concrete",
+      "autoplace": null,
+      "map_color": {
+        "r": 0.092999999999999989341858963598497211933135986328125,
+        "g": 0.767999999999999971578290569595992565155029296875,
+        "b": 0.171999999999999975131004248396493494510650634765625,
+        "a": 0.5
+      }
+    },
+    "blue-refined-concrete": {
+      "name": "blue-refined-concrete",
+      "autoplace": null,
+      "map_color": {
+        "r": 0.155,
+        "g": 0.54000000000000003552713678800500929355621337890625,
+        "b": 0.8980000000000000426325641456060111522674560546875,
+        "a": 0.5
+      }
+    },
+    "orange-refined-concrete": {
+      "name": "orange-refined-concrete",
+      "autoplace": null,
+      "map_color": {
+        "r": 0.86899999999999995026200849679298698902130126953125,
+        "g": 0.5,
+        "b": 0.13000000000000000444089209850062616169452667236328125,
+        "a": 0.5
+      }
+    },
+    "yellow-refined-concrete": {
+      "name": "yellow-refined-concrete",
+      "autoplace": null,
+      "map_color": {
+        "r": 0.83499999999999996447286321199499070644378662109375,
+        "g": 0.6660000000000000142108547152020037174224853515625,
+        "b": 0.0770000000000000017763568394002504646778106689453125,
+        "a": 0.5
+      }
+    },
+    "pink-refined-concrete": {
+      "name": "pink-refined-concrete",
+      "autoplace": null,
+      "map_color": {
+        "r": 0.92900000000000009237055564881302416324615478515625,
+        "g": 0.386000000000000031974423109204508364200592041015625,
+        "b": 0.51400000000000005684341886080801486968994140625,
+        "a": 0.5
+      }
+    },
+    "purple-refined-concrete": {
+      "name": "purple-refined-concrete",
+      "autoplace": null,
+      "map_color": {
+        "r": 0.48499999999999996447286321199499070644378662109375,
+        "g": 0.11100000000000000976996261670137755572795867919921875,
+        "b": 0.6589999999999999857891452847979962825775146484375,
+        "a": 0.5
+      }
+    },
+    "black-refined-concrete": {
+      "name": "black-refined-concrete",
+      "autoplace": null,
+      "map_color": {
+        "r": 0.1,
+        "g": 0.1,
+        "b": 0.1,
+        "a": 0.5
+      }
+    },
+    "brown-refined-concrete": {
+      "name": "brown-refined-concrete",
+      "autoplace": null,
+      "map_color": {
+        "r": 0.3,
+        "g": 0.11700000000000001509903313490212894976139068603515625,
+        "b": 0,
+        "a": 0.5
+      }
+    },
+    "cyan-refined-concrete": {
+      "name": "cyan-refined-concrete",
+      "autoplace": null,
+      "map_color": {
+        "r": 0.275,
+        "g": 0.754999999999999982236431605997495353221893310546875,
+        "b": 0.71199999999999992184029906638897955417633056640625,
+        "a": 0.5
+      }
+    },
+    "acid-refined-concrete": {
+      "name": "acid-refined-concrete",
+      "autoplace": null,
+      "map_color": {
+        "r": 0.559000000000000074606987254810519516468048095703125,
+        "g": 0.761000000000000031974423109204508364200592041015625,
+        "b": 0.157000000000000010658141036401502788066864013671875,
+        "a": 0.5
+      }
+    }
+  },
+  "planet": {
+    "nauvis": {
+      "name": "nauvis",
+      "map_gen_settings": {
+        "aux_climate_control": true,
+        "moisture_climate_control": true,
+        "property_expression_names": {},
+        "cliff_settings": {
+          "name": "cliff",
+          "control": "nauvis_cliff",
+          "cliff_smoothing": 0
+        },
+        "autoplace_controls": {
+          "iron-ore": {},
+          "copper-ore": {},
+          "stone": {},
+          "coal": {},
+          "uranium-ore": {},
+          "crude-oil": {},
+          "water": {},
+          "trees": {},
+          "enemy-base": {},
+          "rocks": {},
+          "starting_area_moisture": {},
+          "nauvis_cliff": {}
+        },
+        "autoplace_settings": {
+          "tile": {
+            "settings": {
+              "grass-1": {},
+              "grass-2": {},
+              "grass-3": {},
+              "grass-4": {},
+              "dry-dirt": {},
+              "dirt-1": {},
+              "dirt-2": {},
+              "dirt-3": {},
+              "dirt-4": {},
+              "dirt-5": {},
+              "dirt-6": {},
+              "dirt-7": {},
+              "sand-1": {},
+              "sand-2": {},
+              "sand-3": {},
+              "red-desert-0": {},
+              "red-desert-1": {},
+              "red-desert-2": {},
+              "red-desert-3": {},
+              "water": {},
+              "deepwater": {}
+            }
+          },
+          "decorative": {
+            "settings": {
+              "brown-hairy-grass": {},
+              "green-hairy-grass": {},
+              "brown-carpet-grass": {},
+              "green-carpet-grass": {},
+              "green-small-grass": {},
+              "green-asterisk": {},
+              "brown-asterisk-mini": {},
+              "green-asterisk-mini": {},
+              "brown-asterisk": {},
+              "red-asterisk": {},
+              "dark-mud-decal": {},
+              "light-mud-decal": {},
+              "cracked-mud-decal": {},
+              "red-desert-decal": {},
+              "sand-decal": {},
+              "sand-dune-decal": {},
+              "green-pita": {},
+              "red-pita": {},
+              "green-croton": {},
+              "red-croton": {},
+              "green-pita-mini": {},
+              "brown-fluff": {},
+              "brown-fluff-dry": {},
+              "green-desert-bush": {},
+              "red-desert-bush": {},
+              "white-desert-bush": {},
+              "garballo-mini-dry": {},
+              "garballo": {},
+              "green-bush-mini": {},
+              "medium-rock": {},
+              "small-rock": {},
+              "tiny-rock": {},
+              "medium-sand-rock": {},
+              "small-sand-rock": {}
+            }
+          },
+          "entity": {
+            "settings": {
+              "iron-ore": {},
+              "copper-ore": {},
+              "stone": {},
+              "coal": {},
+              "crude-oil": {},
+              "uranium-ore": {},
+              "fish": {},
+              "big-sand-rock": {},
+              "huge-rock": {},
+              "big-rock": {}
+            }
+          }
+        }
+      }
+    }
+  }
+}
